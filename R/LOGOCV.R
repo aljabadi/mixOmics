@@ -100,7 +100,7 @@ LOGOCV = function(X,
     rownames(PRED) = rownames(INDICE) = test.keepX
     nbr.temp = matrix(0, nrow = length(test.keepX), ncol = nlevels(Y))
     
-    for (study_i in 1:M)
+    do_study_folds <- function(study_i)
         #LOO on the study factor
     {
         if (progressBar ==  TRUE)
@@ -180,6 +180,20 @@ LOGOCV = function(X,
         
         ## apply function to all test.keepX
         do_testkeepX.res <- lapply(seq_along(test.keepX), function(x) do_testkeepX(x))
+        
+        return(do_testkeepX.res = do_testkeepX.res)
+        
+    } # end study_i 1:M (M folds)
+
+    do_study_folds.res <- lapply(seq_len(M), function(fold) do_study_folds(fold))
+
+    for (study_i in 1:M)
+    {
+        omit = which(study %in% names.study[study_i])
+        X.train = X[-omit, ]
+        Y.train = factor(Y[-omit])
+
+        do_testkeepX.res <- do_study_folds.res[[study_i]]
         
         for (i in seq_along(test.keepX))
         {
