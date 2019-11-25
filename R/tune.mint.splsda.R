@@ -58,7 +58,8 @@ tol = 1e-06,
 max.iter = 100,
 near.zero.var = FALSE,
 light.output = TRUE, # if FALSE, output the prediction and classification of each sample during each folds, on each comp, for each repeat
-signif.threshold=0.01
+signif.threshold=0.01,
+cpus = 1
 )
 {    #-- checking general input parameters --------------------------------------#
     #---------------------------------------------------------------------------#
@@ -205,6 +206,19 @@ signif.threshold=0.01
     
     error.per.class.keepX.opt=list()
     
+    #-- cpus
+    cpus <- .check_cpus(cpus)
+    parallel <- cpus > 1
+    cl = NULL
+    
+    if (parallel)
+    {
+        cluster_type <- ifelse(.onUnix(), "FORK", "SOCK")
+        cl <- makeCluster(cpus, type = cluster_type)
+        on.exit(stopCluster(cl))
+        clusterEvalQ(cl, library(mixOmics))
+    }
+    
     # successively tune the components until ncomp: comp1, then comp2, ...
     for(comp in 1:length(comp.real))
     {
@@ -215,7 +229,7 @@ signif.threshold=0.01
         result = LOGOCV (X, Y, ncomp = 1 + length(already.tested.X), study = study,
         choice.keepX = already.tested.X,
         test.keepX = test.keepX, measure = measure,
-        dist = dist, near.zero.var = near.zero.var, progressBar = progressBar, scale = scale, max.iter = max.iter, auc = auc)
+        dist = dist, near.zero.var = near.zero.var, progressBar = progressBar, scale = scale, max.iter = max.iter, auc = auc, cl = cl)
         
 
         # in the following, there is [[1]] because 'tune' is working with only 1 distance and 'MCVfold.spls' can work with multiple distances

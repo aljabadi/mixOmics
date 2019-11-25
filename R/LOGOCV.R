@@ -42,7 +42,8 @@ LOGOCV = function(X,
                   max.iter = 100,
                   progressBar = FALSE,
                   near.zero.var = FALSE,
-                  scale)
+                  scale,
+                  cl = NULL)
 {
     # X input
     # Y factor input
@@ -184,8 +185,15 @@ LOGOCV = function(X,
         return(do_testkeepX.res = do_testkeepX.res)
         
     } # end study_i 1:M (M folds)
-
-    do_study_folds.res <- lapply(seq_len(M), function(fold) do_study_folds(fold))
+    
+    if (is.null(cl)) {
+        do_study_folds.res <- lapply(seq_len(M), function(fold) do_study_folds(fold))
+    } else {
+        clusterExport(cl, ls())
+        clusterExport(cl, c("study", "names.study", "X", "Y", "max.iter", "choice.keepX", "test.keepX", "scale", "ncomp", "dist", "auc"))
+        do_study_folds.res <- parLapply(cl, seq_len(M), function(fold) do_study_folds(fold))
+    }
+   
 
     for (study_i in 1:M)
     {

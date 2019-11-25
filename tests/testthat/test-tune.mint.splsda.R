@@ -49,3 +49,28 @@ test_that("tune.mint.splsda works with custom alpha", code = {
     expect_equal(errs, c(0.39, 0.39))
     expect_equal(out$choice.ncomp$ncomp, 2)
 })
+
+test_that("tune.mint.splsda works in parallel", code = {
+    data(stemcells)
+    data = stemcells$gene
+    type.id = stemcells$celltype
+    exp = stemcells$study
+    test.keepX = c(20, 40)
+    
+    RNGversion(.mixo_rng())
+    
+    set.seed(42)
+    out = tune.mint.splsda(
+        X = data,
+        Y = type.id,
+        ncomp = 2,
+        near.zero.var = FALSE,
+        study = exp,
+        test.keepX = test.keepX,
+        cpus = 2
+    )
+    expect_is(out, "tune.mint.splsda")
+    errs <- signif(unname(out$error.rate[,1]), 2)
+    expect_equal(errs, c(0.39, 0.39))
+})
+
