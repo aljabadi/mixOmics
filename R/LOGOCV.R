@@ -132,11 +132,9 @@ LOGOCV = function(X,
         #-- near.zero.var ----------------------#
         #---------------------------------------#
         
-        for (i in 1:length(test.keepX))
+        do_testkeepX <-  function(i)
         {
-            if (progressBar ==  TRUE)
-                setTxtProgressBar(pb, (study_i - 1) / M + (i - 1) / length(test.keepX) /
-                                      M)
+            predicttion.comp.i <- class.comp.i <- list()
             
             object.res = suppressWarnings(
                 mint.splsda(
@@ -168,16 +166,31 @@ LOGOCV = function(X,
             # Y.train can be missing factors, so the prediction
             # 'test.predict.sw' might be missing factors compared to the
             # full prediction.comp
-            prediction.comp[omit, match(levels(Y.train), levels(Y)) , i] =
+            prediction.comp.i =
                 test.predict.sw$predict[, , ncomp]
             
-            for (ijk in dist)
-                class.comp[[ijk]][omit, i] =  test.predict.sw$class[[ijk]][, ncomp]
+            for(ijk in dist)
+                class.comp.i[[ijk]] =  test.predict.sw$class[[ijk]][, ncomp]
+            return(list(predicttion.comp.i = prediction.comp.i, class.comp.i = class.comp.i))
             #levels(Y)[test.predict.sw$class[[ijk]][, ncomp]]
         }#end test.keepX
         
         if (progressBar ==  TRUE)
             setTxtProgressBar(pb, (study_i) / M)
+        
+        ## apply function to all test.keepX
+        do_testkeepX.res <- lapply(seq_along(test.keepX), function(x) do_testkeepX(x))
+        
+        for (i in seq_along(test.keepX))
+        {
+            
+            prediction.comp[omit, match(levels(Y.train),levels(Y)) , i] =
+                do_testkeepX.res[[i]]$predicttion.comp.i
+            
+            for(ijk in dist)
+                class.comp[[ijk]][omit,i] = do_testkeepX.res[[i]][["class.comp.i"]][[ijk]]
+            #levels(Y)[test.predict.sw$class[[ijk]][, ncomp]]
+        }
         
     } # end study_i 1:M (M folds)
     
