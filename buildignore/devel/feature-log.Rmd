@@ -1,0 +1,125 @@
+---
+title: "add radarplot"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Objective(s)
+
+- Show choice.keepX in diablo in form of a radar plot such as: https://www.r-graph-gallery.com/143-spider-chart-with-saveral-individuals.html
+![](rplot11_lin.png)
+```{r}
+# install.packages("fmsb")
+library(fmsb)
+```
+
+## radarchart
+
+```{r}
+# Library
+library(fmsb)
+ 
+# Create data: note in High school for several students
+set.seed(99)
+data <- as.data.frame(matrix( sample( 0:20 , 15 , replace=F) , ncol=5))
+colnames(data) <- c("math" , "english" , "biology" , "music" , "R-coding" )
+rownames(data) <- paste("mister" , letters[1:3] , sep="-")
+ 
+# To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each variable to show on the plot!
+data <- rbind(rep(20,5) , rep(0,5) , data)
+ 
+# plot with default options:
+radarchart(data)
+```
+
+## tune.block.splsda
+
+```{r}
+RNGversion(.mixo_rng())
+set.seed(43)
+data("breast.TCGA")
+dat = list(mrna = breast.TCGA$data.train$mrna, mirna = breast.TCGA$data.train$mirna,
+protein = breast.TCGA$data.train$protein)
+design = matrix(1, ncol = length(dat), nrow = length(dat),
+dimnames = list(names(dat), names(dat)))
+diag(design) =  0
+ncomp = 3
+test.keepX = list(mrna = seq(1:4), mirna = seq(5:8), protein = seq(4:7))
+tune = tune.block.splsda(X = dat, Y = breast.TCGA$data.train$subtype,
+ncomp = ncomp, test.keepX = test.keepX, design = design, nrepeat = 1, folds = 3, cpus = 3, progressBar = TRUE)
+```
+
+```{r}
+tune$choice.ncomp
+tune$choice.keepX
+```
+
+### 1. use ggradar
+
+* need to drop % stuff
+* need to add min/max values
+
+```{r}
+plotRadar2 <- function(tuneDiabloObject=NULL, 
+                      ...
+) {
+ 
+    test.keepX <- tuneDiabloObject$test.keepX
+    choice.keepX <- tuneDiabloObject$choice.keepX
+    ncomp <- unique(sapply(tune$choice.keepX, length))
+    if (length(ncomp) > 1) 
+        stop("length(ncomp) is > 1", call. = FALSE)
+    radar_df_comps <- data.frame(c(list(component = paste0("comp-", seq_len(ncomp))), choice.keepX))
+    ggradar::ggradar(radar_df_comps, grid.max = max(radar_df_comps[,-1]), )
+}
+
+plotRadar2(tune)
+```
+
+### 2. use radarchart
+
+* need to adjust for margins
+* possibly grid.arrange
+
+```{r}
+plotRadar1 <- function(tuneDiabloObject=NULL, 
+                      ...
+                      ) {
+    mc <- as.list(match.call(expand.dots = TRUE)[-c(1:2)])
+    test.keepX <- tuneDiabloObject$test.keepX
+    choice.keepX <- tuneDiabloObject$choice.keepX
+    ncomp <- unique(sapply(tune$choice.keepX, length))
+    if (length(ncomp) > 1) 
+        stop("length(ncomp) is > 1", call. = FALSE)
+    
+    radar_df_range <- as.data.frame(lapply(test.keepX, function(x) rev(range(x))))
+    radar_df_comps <- data.frame(choice.keepX, row.names = paste0("comp-", seq_len(ncomp)))
+    radar_df <- rbind(radar_df_range, radar_df_comps)
+    
+    mc$df <- radar_df
+    
+    do.call(fmsb::radarchart, args = mc )
+    # title="Number of variables selected for each dataset and component",
+    
+    # radarchart(radar_df, title = title, pcol = Alstuff::gg_color_hue(ncomp),
+    #            axistype = 2, cglwd = 0.5, plwd = rep(2, ncomp))
+}
+```
+
+```{r}
+op <- par(no.readonly = TRUE)
+par(1,1,1,1)
+plotRadar1(tune, axistype = 2, pcol = Alstuff::gg_color_hue(ncomp), plwd = rep(2, 3))
+legend(x = 2, y = 1.2, legend=paste0("comp ", seq_len(ncomp)),
+       Alstuff::gg_color_hue(ncomp), lty=1:3, cex=0.8,
+       title="Line types", text.font=2, bg='lightblue')
+par(op)
+```
+
+
+
+

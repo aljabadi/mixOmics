@@ -494,7 +494,7 @@ tune.block.splsda = function (X,
     choice.ncomp = list(ncomp = ncomp_opt, values = error.keepX),
     error.rate.class = error.per.class.keepX.opt
   )
-  
+  result$test.keepX <- test.keepX
   result$measure = measure.input
   result$call = match.call()
   
