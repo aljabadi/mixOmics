@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - Show choice.keepX in diablo in form of a radar plot such as: https://www.r-graph-gallery.com/143-spider-chart-with-saveral-individuals.html
 ![](rplot11_lin.png)
+
+Q: is it better to have the lines as Omics or as comps?
+
 ```{r}
 # install.packages("fmsb")
 library(fmsb)
@@ -27,6 +30,16 @@ library(fmsb)
 set.seed(99)
 data <- as.data.frame(matrix( sample( 0:20 , 15 , replace=F) , ncol=5))
 colnames(data) <- c("math" , "english" , "biology" , "music" , "R-coding" )
+colnames(data) <- paste0("Omic-", 1:5)
+rownames(data) <- paste("mister" , letters[1:3] , sep="-")
+ 
+# To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each variable to show on the plot!
+data <- rbind(rep(20,5) , rep(0,5) , data)
+ 
+# plot with default options:
+radarchart(data)
+## ---------------------- or
+colnames(data) <- paste0("Comp-", 1:5)
 rownames(data) <- paste("mister" , letters[1:3] , sep="-")
  
 # To use the fmsb package, I have to add 2 lines to the dataframe: the max and min of each variable to show on the plot!
