@@ -1,0 +1,55 @@
+---
+title: "iss43"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Feature description
+
+[here](https://mixomics-users.discourse.group/t/plotting-predict-function/121)
+
+What can be done:
+
+- `predict` to also return the plsda object
+- a `plotIndiv.predict` method where the overlay is handled
+
+Alternatively, the method also takes plsda object input.
+
+```{r}
+library(mixOmics)
+
+
+data(liver.toxicity)
+X <- liver.toxicity$gene
+Y <- as.factor(liver.toxicity$treatment[, 4])
+
+
+## if training is perfomed on 4/5th of the original data
+samp <- sample(1:5, nrow(X), replace = TRUE)
+test <- which(samp == 1)   # testing on the first fold
+train <- setdiff(1:nrow(X), test)
+
+plsda.train <- plsda(X[train, ], Y[train], ncomp = 2)
+plotIndiv(plsda.train)
+
+test.predict <- predict(plsda.train, X[test, ], dist = "max.dist")
+
+
+Prediction <- test.predict$class$max.dist[, 2]
+cbind(Y = as.character(Y[test]), Prediction)
+```
+
+`shape.input.plotIndiv` uses X and Y from plsda.train2 which are not modified to accommodate test samples and throws error:
+
+```{r}
+plsda.train2 <- plsda.train
+
+plsda.train2$variates$X <- rbind(plsda.train$variates$X, test.predict$variates)
+plsda.train2$Y <- as.factor(c(as.integer(plsda.train$Y),  test.predict$class$max.dist[,2] ))
+plotIndiv(plsda.train2)
+traceback()
+```
+
