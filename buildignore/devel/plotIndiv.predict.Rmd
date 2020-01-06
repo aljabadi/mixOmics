@@ -1,5 +1,5 @@
 ---
-title: "iss43"
+title: "plotIndiv.predict"
 output: html_document
 ---
 
@@ -10,13 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 # Feature description
 
 [here](https://mixomics-users.discourse.group/t/plotting-predict-function/121)
-
-What can be done:
-
-- `predict` to also return the plsda object
-- a `plotIndiv.predict` method where the overlay is handled
-
-Alternatively, the method also takes plsda object input.
 
 ```{r}
 library(mixOmics)
@@ -53,3 +46,9 @@ plotIndiv(plsda.train2)
 traceback()
 ```
 
+# What can be done:
+
+- `predict` to also return the plsda object
+- a `plotIndiv.predict` method where the overlay is handled
+
+Alternatively, the method also takes plsda object input.
