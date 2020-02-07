@@ -1,0 +1,39 @@
+
+# To DO
+
+- run all functions that call internal_min.block and debugonce(explained_variance) with full and ran_na'ed datasets, see how current, imputation by means, and var(..., na.rm  = TRUE) would compare.
+
+# Description
+
+
+The function `explained_variance` replaces possible existing `NA`s with 0. This is the reason why we see strange scree plots such as below:
+
+* internal.mint_block
+
+* ipca
+* spca
+* rcc
+
+Other PCA's calculate their own.
+
+
+```{r}
+impute_by_means <- function(x) {
+  apply(x, 2, function(y){
+    y[is.na(y)] <- mean(y, na.rm=TRUE)
+    y
+  })
+}
+
+rand_na <- function(mat=matrix(1:100, ncol = 20), prop=0.35){
+  set.seed(42)
+  ## calculate the total number of NAs
+  total_na <- floor(prop*prod(dim(mat)))
+  vec <- as.vector(mat)
+  vec[sample(seq_along(vec), size = total_na, replace = FALSE)] <- NA
+  matrix(vec, ncol = ncol(mat), dimnames = dimnames(mat))
+  ## because it should be
+}
+
+```
+
