@@ -1,0 +1,33 @@
+---
+title: "Q2 total"
+output: html_document
+---
+
+
+# To DO
+
+* Read the paper on how Q2.total is calculated
+* Correspond with Marie Chavent
+
+
+# Description
+
+`?mixOmics::perf.mixo_pls` mentioneds:
+
+```{latex}
+Q2:
+if Y containts one variable, a vector of Q^2 values else a list with a matrix of Q^2 values for each Y-variable. Note that in the specific case of an sPLS model, it is better to have a look at the Q2.total criterion, only applies to object inherited from "pls", and "spls"
+```
+
+```{latex}
+Q2.total	
+a vector of Q^2-total values for models with 1, … ,ncomp components, only applies to object inherited from "pls", and "spls"
+```
+
+```{latex}
+Chavent, Marie and Patouille, Brigitte (2003). Calcul des coefficients de regression et du PRESS en regression PLS1. Modulad n, 30 1-11. (this is the formula we use to calculate the Q2 in perf.pls and perf.spls)
+```
+Which is https://www.rocq.inria.fr/axis/modulad/archives/numero-30/chavent-30/chavent-30.pdf
+
+
+
