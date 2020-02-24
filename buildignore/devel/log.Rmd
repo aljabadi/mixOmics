@@ -1,0 +1,13 @@
+---
+title: "nipals::nipals"
+output: html_document
+---
+
+
+# To DO
+
+
+# Description
+
+Benchmaking showed that `nipals::nipals` is much faster than `mixOmics::nipals` producing almost identical results.
+Here, we try to implement their code.
