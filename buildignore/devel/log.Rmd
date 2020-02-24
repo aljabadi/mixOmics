@@ -11,3 +11,36 @@ output: html_document
 
 Benchmaking showed that `nipals::nipals` is much faster than `mixOmics::nipals` producing almost identical results.
 Here, we try to implement their code.
+
+```{r}
+almost_equal <- function(a, b, threshold = 1e-2) {
+    a <- sum(abs(a))
+    b <- sum(abs(b))
+    res <- (a - b)# / (a - b)
+    res < threshold
+}
+```
+
+```{r}
+## Hilbert matrix
+hilbert <- function(n) { i <- 1:n; 1 / outer(i - 1, i, "+") }
+X.na <- X <- hilbert(9)[, 1:6]
+
+## Hilbert matrix with missing data
+idx.na <- matrix(sample(c(0, 1, 1, 1, 1), 36, replace = TRUE), ncol = 6)
+X.na[idx.na == 0] <- NA
+X1 <- mixOmics::nipals(X.na)
+X2 <- mixOmics::nipals2(X.na)
+lapply(names(X1), function(g){
+    almost_equal(X1[[g]], X2[[g]])
+})
+
+X1 <- mixOmics::nipals(X.na, reconst = TRUE)
+X2 <- mixOmics::nipals2(X.na, fitted = TRUE)
+lapply(names(X1), function(g){
+    almost_equal(X1[[g]], X2[[g]])
+})
+
+
+```
+
