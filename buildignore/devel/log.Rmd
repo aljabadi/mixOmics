@@ -2,6 +2,7 @@
 # To DO
 
 - run all functions that call internal_min.block and debugonce(explained_variance) with full and ran_na'ed datasets, see how current, imputation by means, and var(..., na.rm  = TRUE) would compare.
+- See why pca results are different, run using mixOmics::nipals and see how mixOmics::pca is different
 
 # Description
 
@@ -27,6 +28,7 @@ impute_by_means <- function(x) {
 
 rand_na <- function(mat=matrix(1:100, ncol = 20), prop=0.35){
   set.seed(42)
+    mat <- as.matrix(mat)
   ## calculate the total number of NAs
   total_na <- floor(prop*prod(dim(mat)))
   vec <- as.vector(mat)
@@ -35,5 +37,20 @@ rand_na <- function(mat=matrix(1:100, ncol = 20), prop=0.35){
   ## because it should be
 }
 
+```
+
+
+why is there a difference?
+```{r}
+data("liver.toxicity")
+liv <- liver.toxicity$gene[,1:300]
+liv_na <- rand_na(liv)
+
+pca_res <- pca(liv_na, scale = TRUE, center = TRUE)
+nipals_res <- nipals::nipals(liv_na, scale=TRUE, gramschmidt = FALSE, ncomp = 2)
+pca_res$variates$X[1:3,]
+nipals_res$scores[1:3,]
+pca_res$explained_variance
+nipals_res$R2
 ```
 
