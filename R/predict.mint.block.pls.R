@@ -70,10 +70,10 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
     #end general checks
     
     ncomp = object$ncomp
-    
     if(is(object, "DA")) # a DA analysis (mint).(block).(s)plsda
     {
-        #if DA analysis, the unmap Y is in ind.mat
+        # if DA analysis, the dummy matrix Y is in ind.mat
+        # while the classes in object$Y
         Y.factor=object$Y
         Y=object$ind.mat
     }else{
@@ -242,9 +242,9 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
 
     p = lapply(X, ncol)
     q = ncol(Y)
-    J = length(X) #at this stage we have a list of blocks
-    variatesX = object$variates[-(J + 1)];
-    loadingsX = object$loadings[-(J + 1)]
+    n_blocks = length(X) #at this stage we have a list of blocks
+    variatesX = object$variates[-(n_blocks + 1)];
+    loadingsX = object$loadings[-(n_blocks + 1)]
     
     scale = object$scale # X and Y are both mean centered by groups and if scale=TRUE they are scaled by groups
     
@@ -295,8 +295,8 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
             
             # each study is normalized, depending on how the normalization was performed on the learning set (center/scale)
             newdata.list.study.scale.temp =NULL#vector("list",length=J) #list(list())
-            concat.newdata  = vector("list",length=J)
-            for(j in 1:J) # loop on the blocks
+            concat.newdata  = vector("list",length=n_blocks)
+            for(j in 1:n_blocks) # loop on the blocks
             {
                 for (m in 1:M) #loop on the groups of study.test
                 {
@@ -343,7 +343,7 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
             }
             
             # we now need to reorganise concat.newdata as newdata. Indeed, the concatenation was done without taking care of the order of the samples in newdata
-            for(j in 1:J) # loop on the blocks
+            for(j in 1:n_blocks) # loop on the blocks
             {
                 indice.match=match(rownames(newdata[[j]]),rownames(concat.newdata[[j]]))
                 #match indice
@@ -407,7 +407,7 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
     ###  replace NA by 0 in the training data
     if( (hasArg(misdata.all) & hasArg(is.na.X)) && any(list(...)$misdata.all)) # ind.na.X: all blocks except Y
     {    # if misdata.all and ind.na.X are provided, we don't calculate the is.na(X) as it takes time. Used in tune functions.
-        for(j in c(1:J)[list(...)$misdata.all])
+        for(j in c(1:n_blocks)[list(...)$misdata.all])
         X[[j]][list(...)$is.na.X[[j]]]=0 # faster than using replace
     } else {
         # replace NA by 0
@@ -426,7 +426,7 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
     if( (hasArg(misdata.all) & hasArg(is.na.newdata)) && any(list(...)$misdata.all)) # ind.na.newdata: all blocks of newdata
     {
         # if misdata.all and ind.na.X are provided, we don't calculate the is.na(X) as it takes time. Used in tune functions.
-        concat.newdata = lapply(1:J, function(q){replace(concat.newdata[[q]], list(...)$is.na.newdata[[q]], 0)})
+        concat.newdata = lapply(1:n_blocks, function(q){replace(concat.newdata[[q]], list(...)$is.na.newdata[[q]], 0)})
 
     } else {
         # replace NA by 0
@@ -456,7 +456,7 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
     # -----------------------
     
     B.hat = t.pred = Y.hat = list() #= betay
-    for (i in 1 : J)
+    for (i in 1 : n_blocks)
     {
         Pmat = Cmat = Wmat = NULL
         
@@ -501,41 +501,43 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
     if(time) time4 = proc.time()
 
     # basic prediction results
+    ## -------------------------------- block predictions -------------------------------- ##
     if(is(object, block.object) & length(object$X)>1 )
     {
         out=list(predict=Y.hat[which(!is.na(ind.match))],variates=t.pred[which(!is.na(ind.match))],B.hat=B.hat[which(!is.na(ind.match))])
         
-        # average prediction over the blocks
-        temp.all =list()
+        # average prediction over the blocks for each component
+        avg_pred_all =list()
         for(comp in 1:min(ncomp[-object$indY])) #note: all ncomp are the same in v6 as the input parameter is a single value
         {
-            temp = array(0, c(nrow(Y.hat[[1]]), ncol(Y.hat[[1]]), J), dimnames = list(rownames(newdata[[1]]), colnames(Y),names(object$X)))
-            for(i in 1 : J)
-            temp[, , i] = Y.hat[[i]][, , comp]
+            ## an array of predicted class scores of every new sample for each block
+            avg_pred_block = array(0, c(nrow(Y.hat[[1]]), ncol(Y.hat[[1]]), n_blocks), dimnames = list(rownames(newdata[[1]]), colnames(Y),names(object$X)))
+            for(i in 1 : n_blocks)
+            avg_pred_block[, , i] = Y.hat[[i]][, , comp]
             
-            temp.all[[comp]] = temp
+            avg_pred_all[[comp]] = avg_pred_block
         }
-        names(temp.all) = paste0("dim", c(1:min(ncomp[-object$indY])))
+        names(avg_pred_all) = paste0("dim", c(1:min(ncomp[-object$indY])))
         
         if(!hasArg(noAveragePredict))
         {
-            out$AveragedPredict = array(unlist(lapply(temp.all, function(x){
+            ## average class score for each components
+            out$AveragedPredict = array(unlist(lapply(avg_pred_all, function(x){
                 apply(x, c(1,2), mean)
                 
             })), dim(Y.hat[[1]]), dimnames = list(rownames(newdata[[1]]), colnames(Y), paste0("dim", c(1:min(ncomp[-object$indY])))))
-            
-            out$WeightedPredict = array(unlist(lapply(temp.all, function(x){
-                apply(x, c(1,2), function(z){
-                    temp = aggregate(rowMeans(object$weights),list(z),sum)
-                    ind = which(temp[,2]== max (temp[,2]))# if two max, then NA
+            out$WeightedPredict = array(unlist(mapply(avg_pred_all, object$weights, FUN =  function(dim_pred_scores, dim_weights){
+                apply(dim_pred_scores, c(1,2), function(sample_scores){
+                    weighted_score = aggregate(dim_weights,list(sample_scores),sum)
+                    ind = which(weighted_score[,2]== max (weighted_score[,2]))# if two max, then NA
                     if(length(ind) == 1)
                     {
-                        res = temp[ind, 1]
+                        res = weighted_score[ind, 1]
                     } else {
                         res = NA
                     }
                     res
-            })})), dim(Y.hat[[1]]), dimnames = list(rownames(newdata[[1]]), colnames(Y), paste0("dim", c(1:min(ncomp[-object$indY])))))
+                })}, SIMPLIFY = FALSE)), dim(Y.hat[[1]]), dimnames = list(rownames(newdata[[1]]), colnames(Y), paste0("dim", c(1:min(ncomp[-object$indY])))))
         }
 
 
@@ -590,9 +592,8 @@ function(object, newdata,study.test,dist = c("all", "max.dist", "centroids.dist"
         # getting classification for each new sample
         object.temp = object
         object.temp$X = object.temp$X[which(!is.na(ind.match))]
-        object.temp$variates = object.temp$variates[c(which(!is.na(ind.match)),J+1)] #J+1 is Y
         if (!is.null(object$weights))
-            weights <- rowMeans(object$weights)[which(!is.na(ind.match))]
+            weights <- object$weights[which(!is.na(ind.match)),]
         else
             weights <- NULL
         

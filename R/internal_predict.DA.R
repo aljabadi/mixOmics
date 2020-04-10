@@ -217,6 +217,7 @@ internal_predict.DA = function(object, out, q, dist, weights)
                             out.DA$class[[i]][[j]][,comp,drop=FALSE])
                     }
                     colnames(data.temp)="pred"
+                    browser()
                     temp=data.frame(data.temp,indiv=rownames(data.temp),
                     weights=rep(weights,each=nrow(out.DA$class[[1]][[1]])))
                     ag = aggregate(temp$weights,

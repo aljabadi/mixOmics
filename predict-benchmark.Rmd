@@ -1,0 +1,24 @@
+---
+title: "weighted-average-pls"
+output: html_document
+---
+
+
+```{r}
+# devtools::load_all()
+data(nutrimouse)
+data = list(gene = nutrimouse$gene, lipid = nutrimouse$lipid)
+Y = nutrimouse$diet
+
+data("breast.TCGA")
+
+data <- mapply(breast.TCGA$data.test[1:2], breast.TCGA$data.train[1:2], FUN = rbind, SIMPLIFY = FALSE)
+Y <- c(breast.TCGA$data.train$subtype, breast.TCGA$data.test$subtype)
+bp <- lapply(list(dev="dev", current="current"), function(version){
+    wrapper_predict(data = data, Y = Y, ncomp = 2, n_test_per_class = 40, keepX = 2, version = version)$accuracy
+})
+bp
+```
+
+
+
