@@ -1,0 +1,9 @@
+
+# To DO
+
+- Why network coverage is not detected https://codecov.io/gh/mixOmicsTeam/mixOmics/branch/master, and also some others (internal_graphic.perf)
+
+# Description
+
+- Looking at the code coverage there are some lines missed (e.g. in `network` which are clearly added in tests) - not sure why
+- Add more tests/examples to increase coverage
