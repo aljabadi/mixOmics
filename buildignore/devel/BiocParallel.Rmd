@@ -1,0 +1,26 @@
+---
+title: "BiocParallel"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(BiocParallel)
+f = function(i) { Sys.sleep(0.2); i }
+system.time(bplapply(1:10, f, BPPARAM=SerialParam()))
+system.time(bplapply(1:10, f, BPPARAM=MulticoreParam(10)))
+?bplapply
+registered()
+
+
+if (nrow(X) > 30) {
+    folds = split(sample(seq_len(nrow(X))),seq_len(kfold))
+} else {
+    message("\n Low sample size. Using bootstrapped CV.")
+    folds = lapply(seq_len(kfold), function(i) sample(seq_len(nrow(X)), size = ceiling(30/kfold), replace = TRUE))
+}
+```
+
