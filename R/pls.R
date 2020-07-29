@@ -120,31 +120,20 @@
 #' Reviews: Computational Statistics}, 2(1), 97-106.
 #' @keywords regression multivariate
 #' @export
-#' @examples
-#' data(linnerud)
-#' X <- linnerud$exercise
-#' Y <- linnerud$physiological
-#' linn.pls <- pls(X, Y, mode = "classic")
-#' 
-#' \dontrun{
-#' data(liver.toxicity)
-#' X <- liver.toxicity$gene
-#' Y <- liver.toxicity$clinic
-#' toxicity.pls <- pls(X, Y, ncomp = 3)
-#' }
-#' 
-pls <- function(X,
-                Y,
-                ncomp = 2,
-                scale = TRUE,
-                mode = c("regression", "canonical", "invariant", "classic"),
-                tol = 1e-06,
-                max.iter = 100,
-                near.zero.var = FALSE,
-                logratio = "none",
-                # one of "none", "CLR"
-                multilevel = NULL,
-                all.outputs = TRUE)
+#' @example ./examples/pls-examples.R
+pls <- 
+    function(X,
+             Y,
+             ncomp = 2,
+             scale = TRUE,
+             mode = c("regression", "canonical", "invariant", "classic"),
+             tol = 1e-06,
+             max.iter = 100,
+             near.zero.var = FALSE,
+             logratio = "none",
+             # one of "none", "CLR"
+             multilevel = NULL,
+             all.outputs = TRUE)
 {
     # call to 'internal_wrapper.mint'
     result = internal_wrapper.mint(

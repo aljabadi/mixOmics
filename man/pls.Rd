@@ -144,7 +144,6 @@ X <- liver.toxicity$gene
 Y <- liver.toxicity$clinic
 toxicity.pls <- pls(X, Y, ncomp = 3)
 }
-
 }
 \references{
 Tenenhaus, M. (1998). \emph{La regression PLS: theorie et
