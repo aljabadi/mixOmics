@@ -342,7 +342,7 @@ perf.mixo_pls <- function(object,
     }
     
     #-- initialize new objects --#
-    RSS = rbind(rep(n - 1, q), matrix(nrow = ncomp, ncol = q))
+    RSS = rbind(rep(n, q), matrix(nrow = ncomp, ncol = q))
     PRESS.inside = Q2 = MSEP = R2 = matrix(nrow = ncomp, ncol = q)
     MSEP.mat = Ypred = array(0, c(n, q, ncomp))
     

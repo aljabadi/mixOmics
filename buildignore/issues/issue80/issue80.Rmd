@@ -1,0 +1,30 @@
+---
+title: "issue80"
+output: html_document
+---
+
+Using toy data as user did not provide data:
+
+```{r}
+data(linnerud)
+X <- linnerud$exercise
+Y <- linnerud$physiological[,1]
+```
+
+```{r}
+comet.pls <- pls(X,Y,ncomp=3, mode='regression',scale = FALSE)
+
+comet.pls.val <- perf(comet.pls, validation='Mfold',folds =7, nrepeat =200, progressBar = T)
+```
+
+
+```{r}
+comet.pls.val$RSS
+```
+
+```{r}
+RSS0 <- sum(comet.pls$Y^2, na.rm = TRUE)
+RSS0
+comet.pls.val$RSS
+```
+
