@@ -1,0 +1,17 @@
+---
+title: "xxx"
+output: html_document
+---
+
+
+# To DO
+
+-
+
+# Description
+
+Get a grid range, and a `step`, then adjust the step based on how much gain in each step.
+Compare with current setting in terms of the optimal point and time gain 
+**reason**: a lot of users say they do not afford to perform the search all over
+
+> if test.keepX is of form: list(x1 = list(a1,a2, a3), ...), with a3 < a2, then it implies a smart search
