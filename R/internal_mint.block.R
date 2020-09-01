@@ -311,8 +311,8 @@ internal_mint.block <-
                             c = c / t.norm
                             mat.c[,comp] = c
                         } else {
-                            mat.c[,comp] <- t(crossprod(variates.A[[1]][,comp],
-                                                        R[[1]])) / drop(crossprod (variates.A[[1]][,comp]))
+                            mat.c[,comp] <- tcrossprod(variates.A[[1]][,comp],
+                                                       R[[1]]) / drop(crossprod(variates.A[[1]][,comp]))
                         }
                     } else {
                         mat.c = NULL
