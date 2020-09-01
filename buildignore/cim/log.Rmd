@@ -11,3 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Shorter and neater cim
 
+## one function to do hc for all mappings and avoid repeat
+
+* helper.cim_hc to handle mapping-{X, Y, XY}
+
+
+## one internal to get plot variables
+
+* get_cim_names to get row.sideColors, col.sideColors, col.names, row.names
+
