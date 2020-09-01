@@ -2,9 +2,10 @@
 % Please edit documentation in R/pls.R
 \name{pls}
 \alias{pls}
+\alias{pls.default}
 \title{Partial Least Squares (PLS) Regression}
 \usage{
-pls(
+\method{pls}{default}(
   X,
   Y,
   ncomp = 2,
@@ -15,7 +16,8 @@ pls(
   near.zero.var = FALSE,
   logratio = "none",
   multilevel = NULL,
-  all.outputs = TRUE
+  all.outputs = TRUE,
+  ...
 )
 }
 \arguments{
@@ -54,6 +56,8 @@ columns indicate those factors. See examples in \code{?spls}).}
 
 \item{all.outputs}{Logical. Computation can be faster when some specific
 (and non-essential) outputs are not calculated. Default = \code{TRUE}.}
+
+\item{...}{Other arguments passed to methods. Not corrently used.}
 }
 \value{
 \code{pls} returns an object of class \code{"pls"}, a list that

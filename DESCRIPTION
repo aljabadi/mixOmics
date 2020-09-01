@@ -2,7 +2,7 @@ Package: mixOmics
 Type: Package
 Title: Omics Data Integration Project
 Version: 6.13.21
-Depends:  R (>= 3.5.0), 
+Depends: R (>= 3.5.0), 
           MASS, 
           lattice, 
           ggplot2
@@ -53,5 +53,5 @@ Packaged: 2017-02-06 06:49:17 UTC; klecao
 NeedsCompilation: no
 biocViews: ImmunoOncology, Microarray, Sequencing, Metabolomics, Metagenomics, Proteomics,  
            GenePrediction, MultipleComparison, Classification, Regression
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Encoding: UTF-8

@@ -74,6 +74,7 @@
 #' columns indicate those factors. See examples in \code{?spls}).
 #' @param all.outputs Logical. Computation can be faster when some specific
 #' (and non-essential) outputs are not calculated. Default = \code{TRUE}.
+#' @param ... Other arguments passed to methods. Not corrently used.
 #' @return \code{pls} returns an object of class \code{"pls"}, a list that
 #' contains the following components:
 #' 
@@ -119,9 +120,12 @@
 #' structure regression (PLS Regression). \emph{Wiley Interdisciplinary
 #' Reviews: Computational Statistics}, 2(1), 97-106.
 #' @keywords regression multivariate
-#' @export
+#' @name pls
+#' @method pls default
 #' @example ./examples/pls-examples.R
-pls <- 
+
+#' @export
+pls.default <- 
     function(X,
              Y,
              ncomp = 2,
@@ -133,8 +137,10 @@ pls <-
              logratio = "none",
              # one of "none", "CLR"
              multilevel = NULL,
-             all.outputs = TRUE)
+             all.outputs = TRUE,
+             ...)
 {
+    chkDots(...) ## warn unused args
     # call to 'internal_wrapper.mint'
     result = internal_wrapper.mint(
         X = X,
