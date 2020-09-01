@@ -40,6 +40,7 @@ plotIndiv.mint.pls <-
              legend.title = "Legend",
              legend.position = "right",
              point.lwd = 1,
+             background=NULL,
              ...
              
     )
@@ -120,6 +121,9 @@ plotIndiv.mint.pls <-
             if (length(subtitle)!=length(study.init)| length(subtitle)!=length(unique(subtitle)))
                 stop("'subtitle' indicates the subtitle of the plot for each study and it needs to be the same length as 'study' (", length(study.init),") and duplicate are not allowed. 'study' includes: ", paste(study.init, collapse = ", "))
         }
+        
+        if(!is.null(background) &&  !is(background, "background.predict"))
+            stop("'background' must have been obtained with the 'background.predict' function")
         
         df.final = data.frame()
         
@@ -360,6 +364,13 @@ plotIndiv.mint.pls <-
                 df.ellipse$Block = factor(df.ellipse$Block, labels = subtitle)
         }
         df = df.final
+
+        # match background color to col.per.group, the color of the groups
+        if(!is.null(background))
+        {
+            ind.match = match(names(background), levels(df$group))
+            names(background) = adjustcolor(col.per.group[ind.match],alpha.f=0.1)
+        }
         
         if (style == "ggplot2")
             style = "ggplot2-MINT"
@@ -386,7 +397,8 @@ plotIndiv.mint.pls <-
             #missing.col = missing.col,
             #for ggplot2-MINT
             study.levels = study.levels,
-            plot_parameters = plot_parameters
+            plot_parameters = plot_parameters,
+            background = background
         )
         
         return(invisible(list(df = df, graph = res)))
