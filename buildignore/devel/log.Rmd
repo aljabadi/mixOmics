@@ -1,0 +1,39 @@
+# To DO
+
+1) make sure tune.mint.splsda's output's \$error.rate is consistent with perf.mint.splsda's \$global.error
+2) perf.mint.splsda should change to use LOGOCV, and it should create identical outputs as it does now
+
+
+# Description
+
+The performance of the tune.mint.splsda model at optimum hyperparameters:
+
+```{r}
+data(stemcells)
+X = stemcells$gene
+Y = stemcells$celltype
+study <- stemcells$study
+tune.mint = tune.mint.splsda(X = X, Y = Y, study = study, ncomp = 2, test.keepX = seq(1, 100, 5),
+                 dist = "max.dist", progressBar = FALSE)
+plot(tune.mint)
+## plot(x=mint.pls_object) uses x$error.rate, x$error.rate.sd, and x$measure
+```
+
+Should be similar to that of perf.mint.splsda using the same hyperparameters:
+
+```{r}
+mint.splsda.res = mint.splsda(X = X, Y = Y, study = study, ncomp = 2,
+                              keepX = tune.mint$choice.keepX)
+
+perf.mint = perf.mint.splsda(mint.splsda.res, progressBar = FALSE, dist = 'max.dist')
+
+plot(perf.mint)
+## plot(x=perf.mint.pls_object) uses error.rate=x$global.error
+## and calls internal_graphic.perf(error.rate = error.rate, error.rate.sd = NULL
+```
+
+A possible solution is to ensure LOGOCV and perf.mint.splsda (and possibly other perf functions) call the same internal that does dev/test on studies and then make sure the outputs are identical as well.
+
+## TODO 1)
+
+- for tune.mint.splsda, error.rate is  `error.rate = mat.mean.error[, comp]=result_logocv[[measure]]$error.rate.mean[[1]]`

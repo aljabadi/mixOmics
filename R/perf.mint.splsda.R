@@ -38,20 +38,25 @@ perf.mint.plsda <- function (object,
     study = object$study
     ncomp = object$ncomp
     scale = object$scale
-    
     keepX = apply(object$loadings$X, 2, function(x){sum(x!=0)})
-    
-    tol = object$tol
     max.iter = object$max.iter
+    measure = c("overall","BER")
+    near.zero.var <- isTRUE(object$nzv)
     
     dist = match.arg(dist, choices = c("all", "max.dist", "centroids.dist", "mahalanobis.dist"), several.ok = TRUE)
     if (any(dist == "all"))
     {
-        nmthdd = 3
         dist = c("max.dist", "centroids.dist", "mahalanobis.dist")
-    } else {
-        nmthdd = length(dist)
-    }
+    } 
+    
+    result_logocv <- LOGOCV(X = X, Y = Y, ncomp = ncomp, study = study, test.keepX = keepX, 
+                     dist = dist, measure = measure, auc = auc, max.iter = max.iter, 
+                     progressBar = progressBar, near.zero.var = near.zero.var, 
+                     scale = scale)
+    
+    nmthdd = length(dist)
+    
+    
     
     if (!is.logical(progressBar))
         stop("'progressBar' must be either TRUE or FALSE")
@@ -132,7 +137,6 @@ perf.mint.plsda <- function (object,
         
         M = nlevels(study)
         names.study = levels(study)
-        features = NULL
         prediction.comp = matrix(0, nrow = nrow(X), ncol = nlevels(Y), dimnames = list(rownames(X), levels(Y)))
         
         class.comp = list()
@@ -308,7 +312,7 @@ perf.mint.plsda <- function (object,
     
     class(result) = c("perf","perf.mint.splsda.mthd")
     result$call = match.call()
-    
+    result$logocv <- result_logocv
     return(invisible(result))
 }
 
