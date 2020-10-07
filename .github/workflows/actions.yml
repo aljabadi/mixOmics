@@ -142,7 +142,7 @@ jobs:
         # if: (matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release')
         run: |
           set +e
-          Rscript -e "covr::codecov(type = c('tests', 'examples'))"
+          Rscript -e "covr::codecov(type = c('foo'))"
           set -e
 
       - name: Notify Slack
