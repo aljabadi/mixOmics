@@ -47,19 +47,19 @@
 #' @return \code{spca} returns a list with class \code{"spca"} containing the
 #' following components:
 #' \describe{
-#' \item{ncomp}{the number of components to keep in the
-#' calculation.} 
-#' \item{explained_variance}{the adjusted percentage of variance
-#' explained for each component.} 
-#' \item{cum.var}{the adjusted cumulative percentage of variances
-#' explained.}
-#' \item{keepX}{the number of variables kept in each loading
-#' vector.} 
-#' \item{iter}{the number of iterations needed to reach convergence
-#' for each component.} 
-#' \item{rotation}{the matrix containing the sparse
-#' loading vectors.} 
-#' \item{x}{the matrix containing the principal components.}
+#' \item{call}{The function call.} 
+#' \item{X}{The input data matrix, procoessed using \code{base::scale(X, scale =
+#' scale, center = center)}.}
+#' \item{ncomp}{The input arg \code{ncomp}.} 
+#' \item{explained_variance}{A list of length one containing a named real vector
+#' of the adjusted percentage of variance of components.}
+#' \item{cum.var}{the adjusted cumulative percentage of variances explained. See
+#' details.}
+#' \item{keepX}{The input argument \code{keepX}.} 
+#' \item{iter}{The input argument \code{iter}.} 
+#' \item{names}{A list containing the sample and feature names. Used by plot methods.}
+#' \item{loadings}{A list containing containing the sparse loading vectors for X.}
+#' \item{variates}{A list containing containing the component vectors for X.}
 #' }
 #' @author Kim-Anh Lê Cao, Fangzhou Yao, Leigh Coonan, Ignacio Gonzalez, Al J Abadi
 #' @seealso \code{\link{pca}} and http://www.mixOmics.org for more details.
@@ -322,22 +322,19 @@ spca <-
         # the variance is adjusted to account for potential correlation between PCs:                
         explained_variance <- c(cum.var[1], diff(cum.var))
         
-        
-        result = (list(call = cl, X = X,
-                       ncomp = ncomp,	
-                       #sdev = sdev,  # KA: to add if biplot function (but to be fixed!)
-                       #center = center, # KA: to add if biplot function (but to be fixed!)
-                       #scale = scale,   # KA: to add if biplot function (but to be fixed!)
-                       explained_variance = list(X=explained_variance),
-                       cum.var = cum.var,
-                       keepX = vect.keepX,
-                       iter = vect.iter,
-                       rotation = mat.v,
-                       x = mat.u,
-                       names = list(X = X.names, sample = ind.names),
-                       loadings = list(X = mat.v),
-                       variates = list(X = mat.u)
-        ))
+        result = list(call = cl, 
+                      X = X,
+                      ncomp = ncomp,	
+                      center = center,
+                      scale = scale, 
+                      explained_variance = list(X=explained_variance),
+                      cum.var = cum.var,
+                      keepX = vect.keepX,
+                      iter = vect.iter,
+                      names = list(X = X.names, sample = ind.names),
+                      loadings = list(X = mat.v),
+                      variates = list(X = mat.u)
+        )
         ## warning if components are not orthogonal
         .eval_non.orthogonality(variates = result$variates$X, scale=scale)
         

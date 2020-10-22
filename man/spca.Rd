@@ -56,19 +56,19 @@ repeated measurements.}
 \code{spca} returns a list with class \code{"spca"} containing the
 following components:
 \describe{
-\item{ncomp}{the number of components to keep in the
-calculation.} 
-\item{explained_variance}{the adjusted percentage of variance
-explained for each component.} 
-\item{cum.var}{the adjusted cumulative percentage of variances
-explained.}
-\item{keepX}{the number of variables kept in each loading
-vector.} 
-\item{iter}{the number of iterations needed to reach convergence
-for each component.} 
-\item{rotation}{the matrix containing the sparse
-loading vectors.} 
-\item{x}{the matrix containing the principal components.}
+\item{call}{The function call.} 
+\item{X}{The input data matrix, procoessed using \code{base::scale(X, scale =
+scale, center = center)}.}
+\item{ncomp}{The input arg \code{ncomp}.} 
+\item{explained_variance}{A list of length one containing a named real vector
+of the adjusted percentage of variance of components.}
+\item{cum.var}{the adjusted cumulative percentage of variances explained. See
+details.}
+\item{keepX}{The input argument \code{keepX}.} 
+\item{iter}{The input argument \code{iter}.} 
+\item{names}{A list containing the sample and feature names. Used by plot methods.}
+\item{loadings}{A list containing containing the sparse loading vectors for X.}
+\item{variates}{A list containing containing the component vectors for X.}
 }
 }
 \description{
