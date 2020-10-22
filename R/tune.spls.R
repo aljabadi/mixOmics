@@ -418,9 +418,9 @@ tune.spls <-
                 }
                 colnames(error.keepX) = c(paste0('comp', comp.real))
                 rownames(error.keepX) = c(paste0('nrep.', seq_len(nrepeat)))
-                
+                acc <- t.test_transform(error.keepX, type = 'error')
+                opt = t.test.process(acc, alpha = 0.05, alternative = 'less')
                 opt = t.test.process(error.keepX)
-                
                 ncomp_opt = comp.real[opt]
             } else {
                 ncomp_opt = error.keepX = NULL

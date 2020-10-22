@@ -29,7 +29,7 @@
 #' t.test.process(data.frame(comp1=10:14, comp2=20:24, comp3=50:54))
 #' #> 1
 #' @noRd
-t.test.process <- function(mat.error.rate, alpha = 0.01, alternative = "greater")
+t.test.process <- function(mat.error.rate, alpha = 0.05, alternative = "greater")
 {
     if (nrow(mat.error.rate) < 3)
     {
