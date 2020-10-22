@@ -7,7 +7,10 @@
 #' variables to select (\code{keepX}), a number of repeats and folds, data are
 #' split to train and test and the extracted components are compared against
 #' those from a spca model with all the data to ascertain the optimal
-#' \code{keepX}.
+#' \code{keepX} using a one-sided t.test which assesses whether there has been
+#' significant improvement in correlations. The correlation values are
+#' transformed using \code{atanh} function to create unbound values in order to
+#' better satisfy the t.test assumptions.
 #'
 #' The number of selected variables for the following components will then be
 #' sequentially optimised. If the number of observations are small (e.g. < 30),
@@ -118,8 +121,10 @@ tune.spca <- function(X,
         ## use a one-sided t.test using repeat correlations to assess if addition of keepX improved the correlation
         ## and get the index of optimum keepX
         t.test.df <- data.frame(t(cor.df.list[[ncomp]]))
+        ## take cor values into unbounded space
+        t.test.df <- atanh(t.test.df)
         if (nrepeat > 2) 
-            keepX.opt.comp.ind <-  t.test.process(t.test.df, alpha = 0.1, alternative = 'less') 
+            keepX.opt.comp.ind <-  t.test.process(t.test.df, alpha = 0.05, alternative = 'less') 
         else 
             keepX.opt.comp.ind <-  which.max(colMeans(t.test.df))
         

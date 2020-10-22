@@ -64,7 +64,10 @@ Essentially, for the first component, and for a grid of the number of
 variables to select (\code{keepX}), a number of repeats and folds, data are
 split to train and test and the extracted components are compared against
 those from a spca model with all the data to ascertain the optimal
-\code{keepX}.
+\code{keepX} using a one-sided t.test which assesses whether there has been
+significant improvement in correlations. The correlation values are
+transformed using \code{atanh} function to create unbound values in order to
+better satisfy the t.test assumptions.
 
 The number of selected variables for the following components will then be
 sequentially optimised. If the number of observations are small (e.g. < 30),
