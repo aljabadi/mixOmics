@@ -153,14 +153,17 @@ tune.spls <-
         
         choice.keepX = choice.keepY = NULL
         measure.table.cols <- c('comp', 'keepX', 'keepY', 'repeat', 't', 'u', 'cor', 'RSS')
-        measure.pred <- expand.grid(nrep = seq_len(nrepeat),
-                                    keepX = test.keepX, 
+        measure.pred <- expand.grid(keepX = test.keepX, 
                                     keepY = test.keepY,
                                     V = c('u', 't'),
                                     measure = c('cor', 'RSS', 'Q2_total'),
-                                    comp = seq_len(ncomp), 
-                                    value = NA)
-
+                                    comp = seq_len(ncomp),
+                                    optimum = FALSE)
+        measure.pred <- data.frame(measure.pred)
+        measure.pred <- cbind(measure.pred, value = I(rep(list(data.frame(matrix(NA_real_, ncol= 1, nrow = nrepeat))), 
+                                    times = nrow(measure.pred))))
+        # measure.pred$value <- lapply(measure.pred$value, as.data.frame)
+        
         use_progressBar <- progressBar & (is(BPPARAM, 'SerialParam'))
         n_keepA <- length(test.keepX) * length(test.keepY)
             for (comp in seq_len(ncomp)){
@@ -168,7 +171,7 @@ tune.spls <-
                     n_tested <- 0
                     cat(sprintf("\ntuning component: %s\n", comp))
                 }
-   
+              measure.pred[with(measure.pred, which(keepX == test.keepX[1] & keepY == test.keepY[1])),]$optimum <- TRUE
                     for(keepX in 1:length(test.keepX)){
                         for(keepY in 1:length(test.keepY)){
                             if (use_progressBar) {
@@ -182,33 +185,80 @@ tune.spls <-
                                               ncomp = comp, mode = mode)
                             pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
                             
-                            measure.t <- pls.perf[[paste0(measure.tune,'.tpred')]]
-                            measure.t <- unlist(measure.t)
-                            measure.pred[measure.pred$comp == comp & 
+                            for (measure in c('cor', 'RSS'))
+                            {
+                              measure.t <- pls.perf[[paste0(measure,'.tpred')]]
+                              # measure.t <- unlist(measure.t)
+                              measure.u <- pls.perf[[paste0(measure,'.upred')]]
+                              Q2.total <-  pls.perf$Q2.total
+                              measure.pred[measure.pred$comp == comp & 
+                                             measure.pred$keepX == test.keepX[keepX] &
+                                             measure.pred$keepY == test.keepY[keepY] &
+                                             measure.pred$V == 't' &
+                                             measure.pred$measure == measure.tune
+                                           ,]$value[[1]] <- t(data.frame(measure.t))
+                              
+                              
+                              measure.pred[measure.pred$comp == comp & 
                                              measure.pred$keepX == test.keepX[keepX] &
                                              measure.pred$keepY == test.keepY[keepY] &
                                              measure.pred$V == 'u' &
                                              measure.pred$measure == measure.tune
-                                         , 'value'] <- unlist(measure.t)
-                            
-                            measure.u <- pls.perf[[paste0(measure.tune,'.upred')]]
-                            measure.pred[measure.pred$comp == comp & 
-                                             measure.pred$keepX == test.keepX[keepX] &
-                                             measure.pred$keepY == test.keepY[keepY] &
-                                             measure.pred$V == 'u' &
-                                             measure.pred$measure == measure.tune
-                                         , 'value'] <- unlist(measure.u)
-                            
-                            
-                            Q2.total <-  pls.perf$Q2.total
-                            measure.pred[measure.pred$comp == comp & 
+                                           ,]$value[[1]] <- t(data.frame(measure.u))
+                              
+                              measure.pred[measure.pred$comp == comp & 
                                              measure.pred$keepX == test.keepX[keepX] &
                                              measure.pred$keepY == test.keepY[keepY] &
                                              measure.pred$V == 'u' &
                                              measure.pred$measure == 'Q2_total'
-                                         , 'value'] <- Q2.total
-                            Q2.total <-  unlist(Q2.total)
-                            browser()
+                                           ,]$value[[1]] <- t(data.frame(Q2.total))
+                              
+                              if (measure == measure.tune)
+                              {
+                                opt <-  measure.pred[measure.pred$comp == comp & 
+                                                       measure.pred$optimum == TRUE &
+                                                       measure.pred$V == 'u' &
+                                                       measure.pred$measure == measure.tune
+                                                     ,]$value[[1]]
+                                for (v in c('u', 't'))
+                                {
+                                  
+                                  opt <-  measure.pred[measure.pred$comp == comp & 
+                                                         measure.pred$optimum == TRUE &
+                                                         measure.pred$V == v &
+                                                         measure.pred$measure == measure.tune
+                                                       ,]$value[[1]]
+                                  
+                                  value <- measure.pred[measure.pred$comp == comp & 
+                                                          measure.pred$keepX == test.keepX[keepX] &
+                                                          measure.pred$keepY == test.keepY[keepY] &
+                                                          measure.pred$V == v &
+                                                          measure.pred$measure == measure.tune
+                                                        ,]$value[[1]]
+                                  if (nrepeat > 2) {
+                                    t.test.res <- t.test(x = opt, y = value, alternative = ifelse(measure.tune == 'cor', 'greater', 'less'))
+                                      
+                                    }
+                                  }
+                                }
+                                
+                              }
+                              
+                              measure.pred[with(measure.pred, which(comp == comp & 
+                                                                      keepX == test.keepX[keepX] &
+                                                                      keepY == test.keepY[keepY] &
+                                                                      V == 'u' &
+                                                                      measure == measure))
+                                           ,]$value[[1]]  <- t(data.frame(measure.u))
+                              
+                              # TODO drop Q2 as we dropped tune.pls
+                              measure.pred[with(measure.pred, which(comp == comp & 
+                                                                      keepX == test.keepX[keepX] &
+                                                                      keepY == test.keepY[keepY] &
+                                                                      V == 'u' &
+                                                                      measure == 'Q2_total'))
+                                           ,]$value[[1]]  <- t(data.frame(measure.u))
+                            }
                             # Q2.total <-  Reduce('+', Q2.total)/nrepeat
                         } # end keepY
                     } #end keepX
