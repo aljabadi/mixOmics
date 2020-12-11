@@ -237,6 +237,8 @@ tune.spls <-
                                                         ,]$value[[1]]
                                   if (nrepeat > 2) {
                                     t.test.res <- t.test(x = opt, y = value, alternative = ifelse(measure.tune == 'cor', 'greater', 'less'))
+                                    if (t.test.res$p.value < 0.05)
+                                    {
                                       
                                     }
                                   }
