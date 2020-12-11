@@ -152,6 +152,14 @@ tune.spls <-
         measure.tune <- match.arg(measure.tune, choices = c('cor', 'RSS'))
         
         choice.keepX = choice.keepY = NULL
+        measure.table.cols <- c('comp', 'keepX', 'keepY', 'repeat', 't', 'u', 'cor', 'RSS')
+        measure.pred <- expand.grid(nrep = seq_len(nrepeat),
+                                    keepX = test.keepX, 
+                                    keepY = test.keepY,
+                                    V = c('u', 't'),
+                                    measure = c('cor', 'RSS', 'Q2_total'),
+                                    comp = seq_len(ncomp), 
+                                    value = NA)
 
         use_progressBar <- progressBar & (is(BPPARAM, 'SerialParam'))
         n_keepA <- length(test.keepX) * length(test.keepY)
@@ -174,6 +182,32 @@ tune.spls <-
                                               ncomp = comp, mode = mode)
                             pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
                             
+                            measure.t <- pls.perf[[paste0(measure.tune,'.tpred')]]
+                            measure.t <- unlist(measure.t)
+                            measure.pred[measure.pred$comp == comp & 
+                                             measure.pred$keepX == test.keepX[keepX] &
+                                             measure.pred$keepY == test.keepY[keepY] &
+                                             measure.pred$V == 'u' &
+                                             measure.pred$measure == measure.tune
+                                         , 'value'] <- unlist(measure.t)
+                            
+                            measure.u <- pls.perf[[paste0(measure.tune,'.upred')]]
+                            measure.pred[measure.pred$comp == comp & 
+                                             measure.pred$keepX == test.keepX[keepX] &
+                                             measure.pred$keepY == test.keepY[keepY] &
+                                             measure.pred$V == 'u' &
+                                             measure.pred$measure == measure.tune
+                                         , 'value'] <- unlist(measure.u)
+                            
+                            
+                            Q2.total <-  pls.perf$Q2.total
+                            measure.pred[measure.pred$comp == comp & 
+                                             measure.pred$keepX == test.keepX[keepX] &
+                                             measure.pred$keepY == test.keepY[keepY] &
+                                             measure.pred$V == 'u' &
+                                             measure.pred$measure == 'Q2_total'
+                                         , 'value'] <- Q2.total
+                            Q2.total <-  unlist(Q2.total)
                             # Q2.total <-  Reduce('+', Q2.total)/nrepeat
                         } # end keepY
                     } #end keepX
