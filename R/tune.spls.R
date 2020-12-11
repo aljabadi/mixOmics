@@ -143,126 +143,40 @@ tune.spls <-
         nrepeat <- check_cv$nrepeat
         folds <- check_cv$folds
         
-        spls.model <- !is.null(test.keepX) | !is.null(test.keepY)
-        
         test.keepX <- .change_if_null(arg = test.keepX, default = ncol(X))
         test.keepY <- .change_if_null(arg = test.keepY, default = ncol(Y))
         
         test.keepX <- unique(test.keepX)
         test.keepY <- unique(test.keepY)
         
-        if (spls.model) {
-            comps <- seq_len(ncomp)
-            # TODO check test.keepX and test.keepY
-            measure.tune <- match.arg(measure.tune, choices = c('cor', 'RSS'))
-            cor.tpred <- 
-                cor.upred <- 
-                RSS.tpred <- 
-                RSS.upred <- 
-                array(dim      =    c(length(test.keepX), 
-                                      length(test.keepY), 
-                                      nrepeat),
-                      dimnames = list(paste0('keepX_', test.keepX),
-                                      paste0('keepY_', test.keepY),
-                                      paste0('repeat_', seq_len(nrepeat))))
-        } else {
-            if ((test.keepX != ncol(X)) | (test.keepY != ncol(Y)))
-                stop("'test.keepX' and 'test.keepY' can only be provided with method = 'spls'", call. = FALSE)
-            comps <- ncomp
-            test.keepX <- ncol(X)
-            test.keepY <- ncol(Y)
-            cor.tpred = cor.upred = RSS.tpred = RSS.upred = matrix(nrow = ncomp, ncol = nrepeat,
-                                                                   dimnames = list(paste0('comp_', seq_len(ncomp)), paste0('repeat_', seq_len(nrepeat))))
-            Q2.tot.ave = matrix(nrow = ncomp, ncol = nrepeat,
-                                dimnames = list(paste0('comp_', seq_len(ncomp)), paste0('repeat_', seq_len(nrepeat))))
-
-        }
-        choice.keepX = choice.keepY = NULL
-        cor.pred = RSS.pred = list()
-        cov.pred = list()
-        .tune.spls.repeat <- function(test.keepX, test.keepY, X, Y, choice.keepX, choice.keepY, comp, mode, validation, folds)
-        {
-            out <- list()
-            for(keepX in 1:length(test.keepX)){
-                for(keepY in 1:length(test.keepY)){
-                    # sPLS model, updated with the best keepX
-                    pls.res = spls(X = X, Y = Y, 
-                                   keepX = c(choice.keepX, test.keepX[keepX]), 
-                                   keepY = c(choice.keepY, test.keepY[keepY]), 
-                                   ncomp = comp, mode = mode)
-                    # fold CV
-                    res.perf <- .perf.mixo_pls_cv(pls.res, validation = 'Mfold', folds = folds)
-                    out[[paste0('keepX_', keepX)]][[paste0('keepY_', keepY)]] <- list(
-                        t.pred.cv = res.perf$t.pred.cv,
-                        u.pred.cv = res.perf$u.pred.cv,
-                        X.variates =  pls.res$variates$X,
-                        Y.variates =  pls.res$variates$Y,
-                        Q2.total = res.perf$Q2.total
-                    )
-                }
-            }
-            out
-        }
-        use_progressBar <- progressBar & (is(BPPARAM, 'SerialParam'))
+        measure.tune <- match.arg(measure.tune, choices = c('cor', 'RSS'))
         
-            for (comp in comps){
+        choice.keepX = choice.keepY = NULL
+
+        use_progressBar <- progressBar & (is(BPPARAM, 'SerialParam'))
+        n_keepA <- length(test.keepX) * length(test.keepY)
+            for (comp in seq_len(ncomp)){
                 if (use_progressBar) {
-                    msg <- if (spls.model) sprintf("\ntuning component: %s\n", comp) else sprintf("\ntuning pls model ...\n")
-                    cat(msg)
+                    n_tested <- 0
+                    cat(sprintf("\ntuning component: %s\n", comp))
                 }
-                
-                cv.repeat.res <- bplapply(seq_len(nrepeat), 
-                                        FUN = function(k){ 
-                                            if (use_progressBar) {
-                                                .progressBar(k/nrepeat)
-                                            }
-                                            .tune.spls.repeat(test.keepX = test.keepX, test.keepY = test.keepY, X = X, Y = Y, 
-                                                              choice.keepX = choice.keepX, choice.keepY = choice.keepY, comp = comp, 
-                                                              mode = mode, validation = 'Mfold', folds = folds)}, BPPARAM = BPPARAM)
    
-                for(k in seq_len(nrepeat)){
                     for(keepX in 1:length(test.keepX)){
                         for(keepY in 1:length(test.keepY)){
-                            t.pred.cv <-  cv.repeat.res[[k]][[paste0('keepX_', keepX)]][[paste0('keepY_', keepY)]]$t.pred.cv
-                            u.pred.cv <-  cv.repeat.res[[k]][[paste0('keepX_', keepX)]][[paste0('keepY_', keepY)]]$u.pred.cv
-                            X.variates <-  cv.repeat.res[[k]][[paste0('keepX_', keepX)]][[paste0('keepY_', keepY)]]$ X.variates
-                            Y.variates <-  cv.repeat.res[[k]][[paste0('keepX_', keepX)]][[paste0('keepY_', keepY)]]$Y.variates
-                            Q2.total <- cv.repeat.res[[k]][[paste0('keepX_', keepX)]][[paste0('keepY_', keepY)]]$Q2.total
-                            
-                            if (spls.model)
-                            {
-                                # extract the predicted components: 
-                                # if(measure.tune == 'cor' ){
-                                    cor.tpred[keepX, keepY, k] = abs(cor(t.pred.cv[, comp], X.variates[, comp]))
-                                    cor.upred[keepX, keepY,k] = abs(cor(u.pred.cv[, comp], Y.variates[, comp]))
-                                # }
-                                # if(measure.tune == 'RSS'){
-                                    # RSS: no abs values here
-                                    RSS.tpred[keepX, keepY, k] = sum((t.pred.cv[, comp] - X.variates[, comp])^2)/(nrow(X) -1) 
-                                    RSS.upred[keepX, keepY, k] = sum((u.pred.cv[, comp] - Y.variates[, comp])^2)/(nrow(X) -1)
-                                # }
-                                # covariance between predicted variates
-                                ##cov.variate.pred[keepX, keepY, k] = cov(t.pred.cv[, comp], u.pred.cv[, comp])
-                                
-                            } else {
-                                
-                                # extract Q2.total for a PLS, we could extract other outputs such as R2, MSEP etc (only valid for regression)
-                                Q2.tot.ave[, k] = Q2.total 
-                                
-                                # extract the predicted components per dimension, take abs value
-                                cor.tpred[, k] = diag(abs(cor(t.pred.cv, X.variates)))
-                                cor.upred[, k] = diag(abs(cor(u.pred.cv, Y.variates)))
-                                
-                                # RSS: no abs values here
-                                RSS.tpred[, k] = apply((t.pred.cv - X.variates)^2, 2, sum)/(nrow(X) -1)
-                                RSS.upred[, k] = apply((u.pred.cv - Y.variates)^2, 2, sum)/(nrow(X) -1)
+                            if (use_progressBar) {
+                                n_tested <- n_tested + 1
+                                prog_level <- n_tested / n_keepA
+                                .progressBar(prog_level, title = 'of features tested')
                             }
-    
+                            pls.model <- spls(X = X, Y = Y, 
+                                              keepX = c(choice.keepX, test.keepX[keepX]), 
+                                              keepY = c(choice.keepY, test.keepY[keepY]), 
+                                              ncomp = comp, mode = mode)
+                            pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
+                            
+                            # Q2.total <-  Reduce('+', Q2.total)/nrepeat
                         } # end keepY
                     } #end keepX
-                } # end repeat
-                cat('\t')
-                
                 ## add mean and sd across repeats for output
                 .get_mean_and_sd <- function(arr) {
                     list(values = arr, 
@@ -307,9 +221,6 @@ tune.spls <-
                              ind.choice.keepY = choice.keepY_j))
                 }
                 
-                
-                if (spls.model)
-                {
                 # choose the best keepX and keepY based on type.tune
                 if(mode != 'canonical'){  #regression, invariant, classic
                     # define best keepX and keepY based on u
@@ -340,31 +251,20 @@ tune.spls <-
                     choice.keepX = c(choice.keepX, test.keepX[index.t['ind.choice.keepX']])
                     choice.keepY = c(choice.keepY, test.keepY[index.u['ind.choice.keepY']])
                 } # canonical
-                }
-                    } # end comp
-            if (spls.model)
-            {
-               names(choice.keepX) <- names(choice.keepY) <- paste0('comp', seq_len(ncomp))
-               out$choice.keepX = choice.keepX
-               out$choice.keepY = choice.keepY
-            }
+            } # end comp
+  
+        names(choice.keepX) <- names(choice.keepY) <- paste0('comp', seq_len(ncomp))
+        out$choice.keepX = choice.keepX
+        out$choice.keepY = choice.keepY
 
-        # } # end sPLS
-        
-        if(spls.model){
-            out$cor.pred = cor.pred
-            out$RSS.pred = RSS.pred
-        }else{
-            out$cor.pred = cor.pred
-            out$RSS.pred = RSS.pred
-            out$Q2.tot.ave = apply(Q2.tot.ave, 1, mean)
-        }
+        out$cor.pred = cor.pred
+        out$RSS.pred = RSS.pred
         ### evaluate all for output except X and Y to save memory
         ## eval all but X and Y
         mc <- mget(names(formals())[-1:-2], sys.frame(sys.nframe()))
         ## replace function, X and Y with unevaluated call
         mc <- as.call(c(as.list(match.call())[1:3], mc))
         out <- c(list(call = mc), out)
-        class(out) <- if (spls.model) c('tune.pls', 'tune.spls') else c('tune.pls')
+        class(out) <- c('tune.pls', 'tune.spls')
         return(out)
     } 
