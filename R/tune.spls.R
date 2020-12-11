@@ -116,6 +116,7 @@
 #' # plot the results
 #' plot(tune.res)
 #' }
+# change this so that it simply wraps perf
 tune.spls <- 
     function(X,
              Y,
