@@ -208,9 +208,11 @@ tune.spls <-
                                              measure.pred$measure == 'Q2_total'
                                          , 'value'] <- Q2.total
                             Q2.total <-  unlist(Q2.total)
+                            browser()
                             # Q2.total <-  Reduce('+', Q2.total)/nrepeat
                         } # end keepY
                     } #end keepX
+                browser()
                 ## add mean and sd across repeats for output
                 .get_mean_and_sd <- function(arr) {
                     list(values = arr, 
