@@ -208,6 +208,7 @@ tune.spls <-
                                               ncomp = comp, mode = mode)
                             pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
                             
+                            ## now that measure.pred is different for the two, account for it
                             for (measure in c('cor', 'RSS', 'Q2.total'))
                             {
                               measure.t <- pls.perf[[paste0(measure,'.tpred')]]
