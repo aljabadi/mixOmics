@@ -11,3 +11,14 @@ tune.res$choice.keepX
 tune.res$choice.keepY
 # plot the results
 plot(tune.res)
+
+
+## try to se if higher keepA can be recommended using latest changes
+data(liver.toxicity)
+X <- liver.toxicity$gene
+Y <- liver.toxicity$clinic
+set.seed(42)
+tune.res = tune.spls( Y, Y, ncomp = 3,
+                      test.keepX = c(3, 6, 8),
+                      test.keepY = c(3, 6, 8), measure = "cor",
+                      folds = 5, nrepeat = 3, progressBar = TRUE)
