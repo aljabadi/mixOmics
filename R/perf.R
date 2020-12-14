@@ -267,9 +267,26 @@ perf.mixo_pls <- function(object,
         ## CV
         .perf.mixo_pls_cv(object, validation = validation, folds = folds)
     })
-    
     ## change list hierarchy from entry within repeat to repeat within entry
     result <- .relist(result)
+    features <- result$features
+    features <- lapply(.name_list(names(features[[1]])), function(x){
+        out <- lapply(seq_len(nrepeat), function(rep){
+            features[[rep]][[x]][[1]]
+        })
+        # TODO average and merge outside this loop
+        # out <- t(out)
+        # colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
+        out
+    })
+    
+    ind.features <- which(names(result) == 'features')
+    browser()
+    result[-ind.features] <- lapply(result[-ind.features], function(x) {
+        out <- Reduce(f = cbind, x)
+            colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
+        out
+    })
     
     #--- class
     if (is(object,"mixo_spls"))
