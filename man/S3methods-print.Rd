@@ -30,6 +30,7 @@
 \alias{print.tune.rcc}
 \alias{print.tune.splsda}
 \alias{print.tune.pls}
+\alias{print.tune.pls1}
 \alias{print.tune.mint.splsda}
 \alias{print.tune.block.splsda}
 \alias{print.predict}
@@ -88,6 +89,8 @@
 \method{print}{tune.splsda}(x, ...)
 
 \method{print}{tune.pls}(x, ...)
+
+\method{print}{tune.pls1}(x, ...)
 
 \method{print}{tune.mint.splsda}(x, ...)
 

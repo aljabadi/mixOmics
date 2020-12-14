@@ -279,26 +279,27 @@ perf.mixo_pls <- function(object,
         # colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
         out
     })
+    result$features <- NULL ## so we can do the following 
     
-    ind.features <- which(names(result) == 'features')
-    browser()
-    result[-ind.features] <- lapply(result[-ind.features], function(x) {
-        out <- Reduce(f = cbind, x)
-            colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
+    result <- lapply(result, function(x) {
+        out <- Reduce(f = '+', x)/length(x)
+        if (is.null(dim(out)))
+            out <- as.matrix(out) ## nrepeat < 2
+        colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
         out
     })
     
+    result$features <- features
+    
+    method <- "pls1.mthd" # TODO plot uses different classes comapred to print
+    # method <- ifelse(ncol(object$Y) == 1, "pls1.mthd", "pls.mthd")
     #--- class
     if (is(object,"mixo_spls"))
     {
-        method = "spls.mthd"
-        result$features <- .relist(result$features)
-    } else if (is(object, "mixo_pls")) {
-        method = "pls.mthd"
-    } else {
-        warning("Something went wrong. Please contact us.")
-    }
-    class(result) = c("perf",paste(c("perf", method), collapse ="."))
+        method = paste0('s', method)
+        # result$features <- .relist(result$features) # TODO
+    } 
+    class(result) = c(paste(c("perf", method), collapse ="."), "perf")
     result$call <- match.call()
     
     return(result)

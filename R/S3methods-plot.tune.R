@@ -61,46 +61,18 @@ NULL
 plot.tune.spls <-
     function(x, measure = NULL, comp = c(1,2), pch = 16, cex = 1.2, title = NULL,...)
     {
-
+        
         ## if measure not given, use object's 'measure.tune' for spls
         if (is.null(measure) & is(x, 'tune.spls') )
         {
-            measure <- x$call$measure.tune
+            measure <- x$call$measure
         } else {
             measure <- match.arg(measure, c('cor', 'RSS'))    
         }
-        
-        ## function to extract measure stats into tidy data.frame for ggplot
-        .get_ut_df <- function(x, v = c('u', 't'), measure = 'cor', comp) {
-            pred <- ifelse(measure == 'cor', 'cor.pred', 'RSS.pred')
-            
-            df_comps <- lapply(comp, function(comp_i)
-            {
-                ut <- lapply(c(u='u', t='t'), function(o){
-                    mean = x[[pred]][[o]][[comp_i]]$mean
-                    sd = x[[pred]][[o]][[comp_i]]$sd
-                    list(mean = round(mean, 2), sd = round(sd, 3))
-                })
-                
-                df.list <- lapply(v, function(V) {
-                    df <- expand.grid(keepX = x$call$test.keepX, keepY = x$call$test.keepY)
-                    df$V <- V
-                    df$mean <- as.vector(ut[[V]]$mean)
-                    df$sd <- as.vector(ut[[V]]$sd)
-                    df
-                })
-                
-                df <- Reduce(f = rbind, df.list)
-                df$comp <- paste0('comp_', comp_i)
-                df
-            })
-            df <- Reduce(f = rbind, df_comps)
-            df$optimal <-              df$comp == paste0('comp_', comp[1]) & df$keepX == x$choice.keepX[comp[1]] & df$keepY == x$choice.keepY[comp[1]]
-            df$optimal <- df$optimal | df$comp == paste0('comp_', comp[2]) & df$keepX == x$choice.keepX[comp[2]] & df$keepY == x$choice.keepY[comp[1]]
-            df
-        }
-        
-        df <- .get_ut_df(x = x, v = c('u', 't'), measure = measure, comp = comp)
+        browser()
+        # TODO what is the use of comp here
+        uu <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,][,c('keepX', 'keepY', 'value.u', 'value.t')]
+        tt <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,]$value.t
         
         
         ggplot_pls2 <- function(df, title = NULL) {
