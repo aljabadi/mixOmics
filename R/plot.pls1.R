@@ -221,10 +221,18 @@ plot.perf.pls1.mthd <-
               ...
     )
     {
-        if (!any(criterion %in% c("MSEP", "RMSEP", "R2", "Q2","Q2.total")) || length(criterion) > 1)
-            stop("Choose one validation criterion among MSEP, RMSEP, R2 or Q2. Or Q2.total for pls2.")
-        
-        y = switch(criterion, MSEP = x$MSEP, RMSEP = sqrt(x$MSEP), R2 = x$R2, Q2 = x$Q2, Q2.total = x$Q2.total)
+        x$RMSEP <- sqrt(x$MSEP)
+        if (x$method == 'pls2')
+        {
+            
+        } else
+        {
+            
+        }
+        # if (!any(criterion %in% c("MSEP", "RMSEP", "R2", "Q2","Q2.total")) || length(criterion) > 1)
+        #     stop("Choose one validation criterion among MSEP, RMSEP, R2 or Q2. Or Q2.total for pls2.")
+        # 
+        y = x[[criterion]]
         
         Q2.total = NULL
         if ((criterion == "Q2") & is.list(y)) {
@@ -232,9 +240,13 @@ plot.perf.pls1.mthd <-
             y = y$variables
         }
         
-        if (is.null(ylab))
-            ylab = switch(criterion, MSEP = "MSEP", RMSEP = "RMSEP",
-                          R2 = expression(R^~2), Q2 = expression(Q^~2))
+        if (is.null(ylab)) {
+            ylab <- criterion
+            if (ylab == 'R2')
+                ylab <-  expression(R^~2)
+            else if (ylab == 'Q2')
+                ylab == expression(Q^~2)
+        }
         
         nResp = nrow(y)  # Number of response variables
         nComp = ncol(y)  # Number of components

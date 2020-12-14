@@ -305,6 +305,11 @@ tune.spls <-
                                     improved <- if (mode == 'canonical') u.improved & t.improved else u.improved
                                   if (improved)
                                   {
+                                      ## set previous to FALSE
+                                      measure.pred[measure.pred$comp == comp & 
+                                                       measure.pred$measure == measure
+                                                   ,]$optimum <- FALSE
+                                      ## update optimum
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &
                                                    measure.pred$keepY == test.keepY[keepY] &
@@ -318,7 +323,7 @@ tune.spls <-
                             # Q2.total <-  Reduce('+', Q2.total)/nrepeat
                         } # end keepY
                     } #end keepX
-   
+  
               choice.keepX.ncomp <-  measure.pred[measure.pred$comp == comp & 
                                                     measure.pred$optimum == TRUE &
                                                     measure.pred$measure == measure

@@ -279,19 +279,40 @@ perf.mixo_pls <- function(object,
         # colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
         out
     })
+    
+    
+    features <- lapply(features, function(z) {
+        res <- lapply(seq_along(z), function(w) {
+            ww <- data.frame(z[[w]])
+            colnames(ww) <- c('feature', 'freq')
+            ww$rep <- w
+            rownames(ww) <- NULL
+            ww
+        })
+    })
+    ## TODO Does this work if nrepeat = 1
+    features <- lapply(features, function(x) Reduce(x, f = rbind))
+    features <- lapply(features, function(x){
+        x <- group_by(x, feature)
+        suppressMessages({
+            x <- summarise(x, freq=mean(freq, na.rm = TRUE))
+        })
+        x
+    })
+    
     result$features <- NULL ## so we can do the following 
     
     result <- lapply(result, function(x) {
         out <- Reduce(f = '+', x)/length(x)
         if (is.null(dim(out)))
             out <- as.matrix(out) ## nrepeat < 2
-        colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
+        colnames(out) <- paste0('comp_', seq_len(ncol(out)))
         out
     })
     
     result$features <- features
     
-    method <- "pls1.mthd" # TODO plot uses different classes comapred to print
+    method <- "pls1.mthd" # TODO plot uses different classes compared to print
     # method <- ifelse(ncol(object$Y) == 1, "pls1.mthd", "pls.mthd")
     #--- class
     if (is(object,"mixo_spls"))
@@ -299,6 +320,7 @@ perf.mixo_pls <- function(object,
         method = paste0('s', method)
         # result$features <- .relist(result$features) # TODO
     } 
+    result$method <-  ifelse(ncol(object$Y) == 1, "pls1", "pls2")
     class(result) = c(paste(c("perf", method), collapse ="."), "perf")
     result$call <- match.call()
     
@@ -640,7 +662,6 @@ perf.mixo_spls  <- perf.mixo_pls
             
         }
         names(list.features.X)  = names(list.features.Y) = paste0("comp", seq_len(ncomp))
-        
         # features
         result$features$stable.X = list.features.X
         result$features$stable.Y = list.features.Y
