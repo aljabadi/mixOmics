@@ -70,7 +70,9 @@ plot.tune.spls <-
             measure <- match.arg(measure, c('cor', 'RSS'))    
         }
         # TODO what is the use of comp here
-        uu <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,][,c('keepX', 'keepY', 'value.u', 'value.t')]
+        browser()
+        uu <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,]
+        # uu$value.u <- lapply(uu$value.u, function(x)
         tt <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,]$value.t
         
         
@@ -146,24 +148,7 @@ plot.tune.spls <-
         
         text.size = as.integer(cex*10)
         
-        res$gg.plot <- res$gg.plot + theme(panel.border = element_blank(),
-                                         panel.grid.major = element_blank(),
-                                         panel.grid.minor = element_blank(),
-                                         axis.line = element_line(size = 0.5, linetype = "solid",
-                                                                  colour = "black"),
-                                         
-                                         panel.background = element_rect(fill='grey97'),
-                                         
-                                         axis.text = element_text( size = text.size ),
-                                         axis.text.x = element_text( size = text.size, angle = 90, hjust = 1),
-                                         axis.title = element_text( size = text.size),
-                                         legend.text = element_text( size = text.size ),
-                                         legend.title =  element_text( size = text.size),
-                                         plot.title = element_text(hjust = 0.5),
-                                         # subtitles
-                                         strip.text = element_text(size = 1.3*text.size, face = 'bold')
-                                         
-        ) +
+        res$gg.plot <- res$gg.plot + mixo_gg.theme(cex = cex) +
             labs(title = ifelse(!is.null(title), title, sprintf("measure = '%s'", measure)))
         
         res$gg.plot

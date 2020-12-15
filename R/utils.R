@@ -622,3 +622,31 @@ nearZeroVar = function (x, freqCut = 95/5, uniqueCut = 10)
         lapply(.name_list(names(lst)), function(x) lst[[x]][[entry]])
     })
 }
+## ---------------------------- mixo gg theme ----------------------------- ##
+
+#' ggplot2 theme
+#'
+#' @param cex text size
+#' @param x.angle x text angle
+#' @param background.fill background fill for plot
+#'
+#' @noRd
+mixo_gg.theme <- function(cex, x.angle = 90, background.fill = 'grey97') {
+    text.size <- as.integer(cex*10)
+    theme(panel.border = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.line = element_line(size = 0.5, linetype = "solid",
+                                   colour = "black"),
+          panel.background = element_rect(fill = background.fill),
+          
+          axis.text = element_text( size = text.size ),
+          axis.text.x = element_text( size = text.size, angle = x.angle, hjust = x.angle/90),
+          axis.title = element_text( size = text.size),
+          legend.text = element_text( size = text.size ),
+          legend.title =  element_text( size = text.size),
+          plot.title = element_text(hjust = 0.5),
+          # subtitles
+          strip.text = element_text(size = 1.3*text.size, face = 'bold')
+    )
+}

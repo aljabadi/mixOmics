@@ -229,8 +229,8 @@ tune.spls <-
                                               keepX = c(choice.keepX, test.keepX[keepX]), 
                                               keepY = c(choice.keepY, test.keepY[keepY]), 
                                               ncomp = comp, mode = mode, ...)
+                            browser()
                             pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
-                            
                             ## now that measure.pred is different for the two, account for it
 
                                   for (measure in measure) # TODO drop it
@@ -295,7 +295,6 @@ tune.spls <-
                                         } else
                                         {
                                           ## compare values
-                                          compare_f <-  ifelse(measure == 'cor', '>', '<')
                                           improved <-  if (measure == 'cor') mean(opt) < mean(value) else mean(opt) > mean(value)
                                         }
                                       improved

@@ -211,34 +211,19 @@ plot.tune.splsda <- plot.tune.spls1
 plot.perf.pls1.mthd <-
     function (x,
               criterion = "MSEP",
-              #c("MSEP", "RMSEP", "R2", "Q2"),
-              xlab = "number of components",
+              xlab = "Number of components",
               ylab = NULL,
               LimQ2 = 0.0975,
               LimQ2.col = "darkgrey",
-              cTicks = NULL,
-              layout = NULL,
+              sd = TRUE,
+              cex = 1.2,
               ...
     )
     {
-        x$RMSEP <- sqrt(x$MSEP)
-        if (x$method == 'pls2')
-        {
-            
-        } else
-        {
-            
-        }
-        # if (!any(criterion %in% c("MSEP", "RMSEP", "R2", "Q2","Q2.total")) || length(criterion) > 1)
-        #     stop("Choose one validation criterion among MSEP, RMSEP, R2 or Q2. Or Q2.total for pls2.")
-        # 
-        y = x[[criterion]]
-        
-        Q2.total = NULL
-        if ((criterion == "Q2") & is.list(y)) {
-            Q2.total = y$Q2.total
-            y = y$variables
-        }
+        if (length(criterion) > 1 || !(criterion %in% names(x$measures) ))
+            stop("'crierion' must be one of names(", deparse(substitute(x)),"$measures): ", "\n", paste(names(x$measures), sep = ', '))
+
+        df = x$measures[[criterion]]
         
         if (is.null(ylab)) {
             ylab <- criterion
@@ -246,80 +231,39 @@ plot.perf.pls1.mthd <-
                 ylab <-  expression(R^~2)
             else if (ylab == 'Q2')
                 ylab <- expression(Q^~2)
+            else if (ylab == 'Q2.total')
+                ylab <- bquote(Q[total]^~2)
+            else if(grepl('pred', ylab)) ## subscript
+            { ## {RSS/cor}{.}{t/u}{pred}
+                measure <- substr(ylab, start = 0, stop = 3)
+                v <- substr(ylab, start = 5, stop = 5)
+                ylab <- bquote(.(measure)[pred]^.(v))
+                
+                }
+               
+                # ylab <- bquote(.(gsub('pred', '', ylab))*''[pred]))
         }
         
-        nResp = nrow(y)  # Number of response variables
-        nComp = ncol(y)  # Number of components
+        # TODO Q2 with pls2
+        df$comp <- seq_len(nrow(df))
+        df$upper <- df$mean + df$sd
+        df$lower <- df$mean - df$sd
         
-        #def.par = par(no.readonly = TRUE)
+        p <- ggplot(df, aes(comp, mean)) + theme_classic() +
+            labs(x = xlab, y = ylab) + mixo_gg.theme(cex = cex, x.angle = 0)
         
-        if (nResp > 1) {
-            if (is.null(layout)) {
-                nRows = min(c(3, nResp))
-                nCols = min(c(3, ceiling(nResp / nRows)))
-                layout = c(nRows, nCols)
-            }
-            else {
-                if (length(layout) != 2 || !is.numeric(layout) || any(is.na(layout)))
-                    stop("'layout' must be a numeric vector of length 2.")
-                nRows = layout[1]
-                nCols = layout[2]
-            }
-            
-            if (nRows * nCols < nResp) devAskNewPage(TRUE)
-            ynames = rownames(y)
-        } else {
-            ynames = "Y"
-        }
+        if (grepl('Q2', criterion))
+            p <- p + geom_hline(yintercept = LimQ2, col = LimQ2.col)
         
-        val = comps = vector("numeric")
-        varName = vector("character")
+        p <- p + geom_point(shape = 1, col = color.mixo(1), size = cex*2) +
+            geom_line(col = color.mixo(1))
         
-        for (i in 1:nResp) {
-            val = c(val, y[i, ])
-            comps = c(comps, 1:nComp)
-            varName = c(varName, rep(ynames[i], nComp))
-        }
-        
-        df = data.frame(val = val, comps = comps, varName = varName)
-        if (is.null(cTicks)) cTicks = 1:ncol(y)
-        yList = list(relation = "free")
-        
-        
-        if (criterion == "Q2" | criterion == "Q2.total")
-        {
-            plt = xyplot(val ~ comps | varName, data = df, xlab = xlab, ylab = ylab,
-                         scales = list(y = yList, x = list(at = cTicks)),
-                         as.table = TRUE, layout = layout,
-                         panel = function(x, y) {
-                             if (LimQ2.col != "none") panel.abline(h = LimQ2, col = LimQ2.col)
-                             panel.xyplot(x, y, ...)})
-            plot(plt)
-            
-            if (!is.null(Q2.total)) {
-                devAskNewPage(TRUE)
-                Q2.df = data.frame(Q2 = Q2.total, comps = 1:nComp, varName = rep("Total", nComp))
-                xyplot(Q2 ~ comps | varName, data = Q2.df, xlab = xlab, ylab = ylab,
-                       scales = list(y = yList, x = list(at = cTicks)), as.table = TRUE,
-                       panel = function(x, y) {
-                           if (LimQ2.col != "none") panel.abline(h = LimQ2, col = LimQ2.col)
-                           panel.xyplot(x, y, ...)})
-            }
-        } else {
-            plt = xyplot(val ~ comps | varName, data = df, xlab = xlab, ylab = ylab,
-                         scales = list(y = yList, x = list(at = cTicks)),
-                         as.table = TRUE, layout = layout, ...)
-            plot(plt)
-            
-        }
-        
-        if (nResp > 1) {
-            if (nRows * nCols < nResp) devAskNewPage(FALSE)
-        }
-        
-        #par(def.par)
-        
-        
+        if (sd)
+            if (any (is.na(df$sd)))
+                message("error bars cannot be calculated as nrepeat < 3")
+            else
+                p <- p + geom_errorbar(aes(ymin=lower, ymax = upper), width=0.04, col = color.mixo(2))
+        p
     }
 
 #' @rdname plot.perf

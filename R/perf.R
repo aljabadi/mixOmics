@@ -267,9 +267,25 @@ perf.mixo_pls <- function(object,
         ## CV
         .perf.mixo_pls_cv(object, validation = validation, folds = folds)
     })
+    ## add nrepeat to matrices here
     ## change list hierarchy from entry within repeat to repeat within entry
     result <- .relist(result)
+
     features <- result$features
+    result$features <- NULL
+    
+    ## tidy df
+    result <- lapply(result, function(item){
+        mat <- melt(item)
+        if (ncol(mat) > 4) browser()
+        colnames(mat) <- c('feature', 'comp', 'value', 'nrep')
+        #' @importFrom dplyr ungroup mutate group_by
+        mat <- group_by(mat, feature, comp)
+        mat <- mutate(mat, mean = mean(value), sd = sd(value))
+        mat <- dplyr::ungroup(mat)
+        as.data.frame(mat)
+    } )
+    
     features <- lapply(.name_list(names(features[[1]])), function(x){
         out <- lapply(seq_len(nrepeat), function(rep){
             features[[rep]][[x]][[1]]
@@ -291,25 +307,18 @@ perf.mixo_pls <- function(object,
         })
     })
     ## TODO Does this work if nrepeat = 1
-    features <- lapply(features, function(x) Reduce(x, f = rbind))
     features <- lapply(features, function(x){
-        x <- group_by(x, feature)
+        out <- Reduce(x, f = rbind)
+        out <- group_by(out, feature)
         suppressMessages({
-            x <- summarise(x, freq=mean(freq, na.rm = TRUE))
+            out <- summarise(out, freq=round(mean(freq, na.rm = TRUE), digits = 2))
         })
-        x
+        #' @importFrom dplyr ungroup
+        out <- dplyr::ungroup(out)
+        out <- out[order(out$freq, decreasing = TRUE),]
+        as.data.frame(out)
     })
-    
-    result$features <- NULL ## so we can do the following 
-    
-    result <- lapply(result, function(x) {
-        out <- Reduce(f = '+', x)/length(x)
-        if (is.null(dim(out)))
-            out <- as.matrix(out) ## nrepeat < 2
-        colnames(out) <- paste0('comp_', seq_len(ncol(out)))
-        out
-    })
-    
+    result <- list(measures = result)
     result$features <- features
     
     method <- "pls1.mthd" # TODO plot uses different classes compared to print
@@ -613,38 +622,52 @@ perf.mixo_spls  <- perf.mixo_pls
         colnames(MSEP) = colnames(R2) = colnames(Q2) = object$names$colnames$Y
         
         result$MSEP = t(MSEP)
+        result$RMSEP = sqrt(t(MSEP))
         #result$MSEP.mat = MSEP.mat  
         result$R2 = t(R2)
         result$Q2 = t(Q2)  # remove this output when canonical mode?
     }
     
-    
-    
     result$Q2.total =  Q2.total
-    result$RSS = RSS
-    result$PRESS = PRESS.inside
-    # result$press.mat = press.mat
-    #result$RSS.indiv = RSS.indiv
-    result$d.cv = d.cv  # KA added  
-    result$b.cv = b.cv  # KA added 
-    result$c.cv = c.cv  # KA added 
-    result$u.cv = u.cv  # KA added 
-    result$a.cv = a.cv  # KA added 
-    result$t.pred.cv = t.pred.cv  # needed for tuning
-    result$u.pred.cv = u.pred.cv  # needed for tuning
-    
-    # extract the predicted components per dimension, take abs value
-    result$cor.tpred = diag(abs(cor(t.pred.cv, object$variates$X)))
-    result$cor.tpred = t(data.matrix(result$cor.tpred, rownames.force = TRUE))
-    result$cor.upred = diag(abs(cor(u.pred.cv, object$variates$Y)))
-    result$cor.upred = t(data.matrix(result$cor.upred, rownames.force = TRUE))
-    
-    # RSS: no abs values here
-    result$RSS.tpred = apply((t.pred.cv - object$variates$X)^2, 2, sum)/(nrow(X) -1)
-    result$RSS.tpred  = t(data.matrix(result$RSS.tpred, rownames.force = TRUE))
-    result$RSS.upred = apply((u.pred.cv - object$variates$Y)^2, 2, sum)/(nrow(X) -1)
-    result$RSS.upred  = t(data.matrix(result$RSS.upred, rownames.force = TRUE))
-    
+    RSS <- t(RSS) ## bc all others are transposed
+    PRESS = t(PRESS.inside)
+    result$RSS <- RSS[,-1] ## drop q/p
+    result$PRESS <- PRESS
+    if (ncol(object$Y) > 1)
+    {
+        # TODO ensure these are in fact no more necessary
+        #result$d.cv = d.cv  # KA added  
+        #result$b.cv = b.cv  # KA added 
+        #result$c.cv = c.cv  # KA added 
+        #result$u.cv = u.cv  # KA added 
+        #result$a.cv = a.cv  # KA added 
+        #result$t.pred.cv = t.pred.cv  # needed for tuning
+        #result$u.pred.cv = u.pred.cv  # needed for tuning
+        
+        # extract the predicted components per dimension, take abs value
+        result$cor.tpred = diag(abs(cor(t.pred.cv, object$variates$X)))
+        result$cor.tpred = t(data.matrix(result$cor.tpred, rownames.force = TRUE))
+        result$cor.upred = diag(abs(cor(u.pred.cv, object$variates$Y)))
+        result$cor.upred = t(data.matrix(result$cor.upred, rownames.force = TRUE))
+        
+        # RSS: no abs values here
+        result$RSS.tpred = apply((t.pred.cv - object$variates$X)^2, 2, sum)/(nrow(X) -1)
+        result$RSS.tpred  = t(data.matrix(result$RSS.tpred, rownames.force = TRUE))
+        result$RSS.upred = apply((u.pred.cv - object$variates$Y)^2, 2, sum)/(nrow(X) -1)
+        result$RSS.upred  = t(data.matrix(result$RSS.upred, rownames.force = TRUE))
+    }
+    result <- mapply(result, names(result), FUN = function(arr, measure) {
+        arr <- data.matrix(arr)
+        col.names <- paste0('comp', seq_len(ncomp))
+        if (ncol(arr) == ncomp)
+            colnames(arr) <- col.names
+        else
+            stop("unexpected dimension for entry in perf measures: ", measure)
+        if (nrow(arr) == 1)
+            rownames(arr) <- measure
+        arr
+    }, SIMPLIFY = FALSE)
+
     #---- extract stability of features -----#
     if (is(object, "mixo_spls"))
     {
