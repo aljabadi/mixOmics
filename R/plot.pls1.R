@@ -245,7 +245,7 @@ plot.perf.pls1.mthd <-
             if (ylab == 'R2')
                 ylab <-  expression(R^~2)
             else if (ylab == 'Q2')
-                ylab == expression(Q^~2)
+                ylab <- expression(Q^~2)
         }
         
         nResp = nrow(y)  # Number of response variables
