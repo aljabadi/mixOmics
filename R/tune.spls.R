@@ -248,7 +248,6 @@ tune.spls <-
                                     {
                                       ## populate the table for both measures
                                       measure.vpred <- pls.perf$measures[[sprintf("%s.upred", measure, v)]]
-                                      #' @importFrom dplyr filter select
                                       measure.vpred <- measure.vpred[measure.vpred$comp == comp,]
              
                                       measure.pred[measure.pred$comp == comp & 
@@ -261,7 +260,6 @@ tune.spls <-
                                       
                                     }
                                     value.Q2.total <- pls.perf$measures$Q2.total
-                                    #' @importFrom dplyr filter select
                                     value.Q2.total <- filter(value.Q2.total, comp == comp)$values
                                     
                                     measure.pred[measure.pred$comp == comp & 
