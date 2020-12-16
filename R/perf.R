@@ -259,7 +259,7 @@ perf.mixo_pls <- function(object,
     progressBar <- .check_logical(progressBar)
     
     # TODO add BPPARAM to args and use bplapply
-    repeat_names <- .name_list(char = seq_len(nrepeat), names = paste0('repeat_', seq_len(nrepeat)))
+    repeat_names <- .name_list(char = seq_len(nrepeat))
     result <- lapply(X = repeat_names, FUN = function(repeat_i) {
         ## progress bar
         if (progressBar == TRUE) # TODO drop for parallel
@@ -631,7 +631,7 @@ perf.mixo_spls  <- perf.mixo_pls
     result$Q2.total =  Q2.total
     RSS <- t(RSS) ## bc all others are transposed
     PRESS = t(PRESS.inside)
-    result$RSS <- RSS[,-1] ## drop q/p
+    result$RSS <- RSS[,-1, drop = FALSE] ## drop q/p
     result$PRESS <- PRESS
     if (ncol(object$Y) > 1)
     {
@@ -658,7 +658,7 @@ perf.mixo_spls  <- perf.mixo_pls
     }
     result <- mapply(result, names(result), FUN = function(arr, measure) {
         arr <- data.matrix(arr)
-        col.names <- paste0('comp', seq_len(ncomp))
+        col.names <- seq_len(ncomp)
         if (ncol(arr) == ncomp)
             colnames(arr) <- col.names
         else

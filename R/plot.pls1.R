@@ -214,17 +214,23 @@ plot.perf.pls1.mthd <-
               xlab = "Number of components",
               ylab = NULL,
               LimQ2 = 0.0975,
-              LimQ2.col = "darkgrey",
+              LimQ2.col = 'grey30',
               sd = TRUE,
+              pch = 1,
+              pch.size = 3,
               cex = 1.2,
+              col = color.mixo(1),
+              title = NULL, ## not used by feature-wise measures
               ...
     )
     {
         if (length(criterion) > 1 || !(criterion %in% names(x$measures) ))
-            stop("'crierion' must be one of names(", deparse(substitute(x)),"$measures): ", "\n", paste(names(x$measures), sep = ', '))
-
+            stop("'criterion' must be one of names(", 
+                 deparse(substitute(x)),"$measures): ", "\n", 
+                 paste(names(x$measures), collapse = ', '))
         df = x$measures[[criterion]]
-        
+        df <- df[!duplicated(df[,c(1,2,5,6)]),] ## only mean and sd
+        repeated <- all(!is.na(df$sd))
         if (is.null(ylab)) {
             ylab <- criterion
             if (ylab == 'R2')
@@ -240,29 +246,49 @@ plot.perf.pls1.mthd <-
                 ylab <- bquote(.(measure)[pred]^.(v))
                 
                 }
-               
-                # ylab <- bquote(.(gsub('pred', '', ylab))*''[pred]))
+        }
+        features <- as.character(unique(df$feature))
+        if (length(features) == 1)
+        {
+            ## will be used as subtitle by facet_wrap
+            title <- .check_character(arg = title, len = 1, default = '')
+            df$feature <- factor(title)
         }
         
         # TODO Q2 with pls2
-        df$comp <- seq_len(nrow(df))
         df$upper <- df$mean + df$sd
         df$lower <- df$mean - df$sd
         
-        p <- ggplot(df, aes(comp, mean)) + theme_classic() +
-            labs(x = xlab, y = ylab) + mixo_gg.theme(cex = cex, x.angle = 0)
+        p <- ggplot(df, aes(comp, mean)) + theme_bw(base_size = as.integer(cex*10)) +
+            labs(x = xlab, y = ylab) #+ mixo_gg.theme(cex = cex, x.angle = 0, subtitle.cex = 1.2*cex)
+        ## discrete x
+        p <- p + theme(panel.grid.minor = element_blank())
         
+        if (length(features) == 1 && title == '')
+            p <- p +  theme(strip.background = element_blank())
         if (grepl('Q2', criterion))
-            p <- p + geom_hline(yintercept = LimQ2, col = LimQ2.col)
+        {
+            # min.y <- ifelse(repeated, min(df$lower), min(df$mean))
+            # max.y <- ifelse(repeated, max(df$upper), max(df$mean))
+            # y.breaks <- sort(c(round(seq(min.y, max.y, length.out=5), 2), LimQ2))
+            p <- p + geom_hline(yintercept = LimQ2, col = LimQ2.col, size  = 1.3) #+
+            # geom_text(x = max(df$comp), y = 0.0975, label = 'Q2 = 0.0975', hjust=1, vjust=-0.5)
+           # scale_y_continuous(breaks = y.breaks)
+        }
+            
         
-        p <- p + geom_point(shape = 1, col = color.mixo(1), size = cex*2) +
-            geom_line(col = color.mixo(1))
+        p <- p + geom_point(shape = pch, col = col, size = pch.size) 
         
         if (sd)
             if (any (is.na(df$sd)))
                 message("error bars cannot be calculated as nrepeat < 3")
             else
-                p <- p + geom_errorbar(aes(ymin=lower, ymax = upper), width=0.04, col = color.mixo(2))
+                p <- p + geom_errorbar(aes(ymin = lower, ymax = upper),
+                                       width = 0.08,
+                                       col = color.mixo(2))
+        
+        p <- p + facet_wrap(.~feature)
+        
         p
     }
 
