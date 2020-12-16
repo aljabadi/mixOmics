@@ -140,20 +140,7 @@ tune.spls <-
         
         X <- .check_numeric_matrix(X, block_name = 'X')
         Y <- .check_numeric_matrix(Y, block_name = 'Y')
-        if (ncol(Y) == 1) {
-            res <- tune.spls1(X = X, 
-                              Y = Y,
-                              ncomp = ncomp,
-                              test.keepX = test.keepX,
-                              validation = validation,
-                              folds = folds,
-                              measure = measure, # can do a R2 per Y (correlation, linear regression R2), need to call MSEP (see perf.spls).
-                              progressBar = progressBar,
-                              nrepeat = nrepeat,
-                              ...
-            )
-            return(res)
-        }
+        
         check_cv <- .check_cv_args(validation = validation, 
                                    nrepeat = nrepeat, folds = folds, 
                                    N = nrow(X))
@@ -168,6 +155,30 @@ tune.spls <-
         test.keepY <- unique(test.keepY)
         
         spls.model <- !(length(test.keepX) == 1 & length(test.keepY) == 1)
+        
+        if (ncol(Y) == 1) {
+          res <- tune.spls1(X = X, 
+                            Y = Y,
+                            ncomp = ncomp,
+                            test.keepX = test.keepX,
+                            validation = validation,
+                            folds = folds,
+                            measure = measure, # can do a R2 per Y (correlation, linear regression R2), need to call MSEP (see perf.spls).
+                            progressBar = progressBar,
+                            nrepeat = nrepeat,
+                            ...
+          )
+            ## --- call
+            res$call <- NULL
+            ## eval all but X and Y
+            mc <- mget(names(formals())[-1:-2], sys.frame(sys.nframe()))
+            ## replace function, X and Y with unevaluated call
+            mc <- as.call(c(as.list(match.call())[1:3], mc))
+            res <- c(list(call = mc), res)
+            class(res) <- 'tune.spls1'
+            return(res)
+        }
+
         measure <- match.arg(measure, choices = c('cor', 'RSS'))
         
         choice.keepX = choice.keepY = NULL

@@ -52,6 +52,7 @@ plot.tune.spls1 <-
             ylim = range(error)
         }
         
+        optimal <- optimal && (x$call$nrepeat > 2)
         select.keepX <- x$choice.keepX[colnames(error)]
         comp.tuned = length(select.keepX)
         
@@ -123,7 +124,7 @@ plot.tune.spls1 <-
             df$upr = df$y + dferror$value
             
             #adding the error bar to the plot
-            p = p + geom_errorbar(data=df,aes(ymin=lwr, ymax=upr))
+            p = p + geom_errorbar(data=df,aes(ymin=lwr, ymax=upr), width = 0.08)
         }
         
         if(optimal)

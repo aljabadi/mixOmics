@@ -874,20 +874,20 @@ print.tune.pls = function(x, ...)
     cat("\n  plot \n")
 }
 
-#' @method print tune.pls1
+#' @method print tune.spls1
 #' @rdname S3methods-print
 #' @export
-print.tune.pls1 = function(x, ...)
+print.tune.spls1 = function(x, ...)
 {
     cat("Call:\n", deparse(x$call, width.cutoff = 500), "\n\n")
     cat("\n  Main numerical outputs: \n",
         "-------------------- \n")
     
-    if (is(x, 'tune.spls') & x$call$nrepeat > 3)
+    if (is(x, 'tune.spls1') & x$call$nrepeat > 2)
     {
         cat(sprintf("\n  Optimal keep%s for each component based on the provided tune measure, see object$choice.keep%s", c('X', 'Y'), c('X', 'Y')))
     }
-    cat("\n Optimal number of components: see object$choice.ncomp \n")
+    cat("\n  Optimal number of components: see object$choice.ncomp \n")
     
     cat("\n  Visualisation Functions: \n", "--------------------")
     cat("\n  plot \n")

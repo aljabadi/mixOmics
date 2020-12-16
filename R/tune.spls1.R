@@ -212,7 +212,7 @@ tune.spls1 <-
         choices = c("MSE", "MAE","Bias","R2")
         measure = choices[pmatch(measure, choices)]
         if (is.na(measure))
-            stop("'measure' must be one of 'MSE', 'MAE', 'bias' or 'R2' ")
+            stop("'measure' must be one of 'MSE', 'MAE', 'Bias' or 'R2' ")
         
         if (is.null(ncomp) || !is.numeric(ncomp) || ncomp <= 0)
             stop("invalid number of variates, 'ncomp'.")

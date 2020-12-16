@@ -72,12 +72,8 @@ plot.tune.spls <-
         df <- x$measure.pred[x$measure.pred$measure == measure,]
         values <- grepl('value', colnames(df))
         df <- df[,!values]
-        # TODO what is the use of comp here
-        uu <- x$measure.pred[x$measure.pred$measure == measure,]$value.u
-        # uu$value.u <- lapply(uu$value.u, function(x)
-        tt <- x$measure.pred[x$measure.pred$measure == measure,]$value.t
-        
-        
+        df$comp <- paste0('comp ', df$comp)
+       
         ggplot_pls2 <- function(df, title = NULL) {
             
             ## optimal keepX/keepY
@@ -106,15 +102,24 @@ plot.tune.spls <-
             list(gg.plot = p, df= df)
         }
         
+        ## this should not bee needed at all as tune.pls1 is different
+        ## and uses plot.tune.pls1
         ggplot_pls1 <- function(df, ## from .get_ut_df
                                 title = NULL, ## title
                                 keepA = 'keepX',
                                 cex) ## which keepA is not fixed?
             {
             ## keepX or keepY must be removed before running this
-            p <- ggplot(df, aes_string(x = keepA, y = 'mean', col = 'sd')) + 
+            p <- ggplot(df, aes_string(x = keepA, y = 'mean',  col = 'comp')) + 
                 geom_point(shape = pch, size = cex) +
-                scale_color_gradient(low = 'blue', high = 'red', na.value = color.mixo(1)) + 
+                geom_line()
+            if (!any(is.na(df$sd)))
+            {
+                df$lower <- df$mean - df$sd
+                df$upper <- df$mean + df$sd
+                p <- p + geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.08)
+            }
+            p <- p + scale_color_gradient(low = 'blue', high = 'red', na.value = color.mixo(1)) + 
                 labs(x = keepA, y = measure, col = 'SD') +
                 facet_grid(.~comp, scales = 'free')
             
