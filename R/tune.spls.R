@@ -176,7 +176,7 @@ tune.spls <-
         # {
           measure.pred <- expand.grid(keepX = test.keepX, 
                                       keepY = test.keepY,
-                                      # V = c('u', 't'),
+                                      V = c('u', 't'),
                                       measure = c('cor', 'RSS'),
                                       comp = seq_len(ncomp),
                                       optimum.keepA = FALSE)
@@ -188,9 +188,7 @@ tune.spls <-
         # }
         measure.pred <- data.frame(measure.pred)
         measure.pred <- cbind(measure.pred, 
-                              value.u = I(rep(list(data.frame(matrix(NA_real_, ncol= 1, nrow = nrepeat))), 
-                                    times = nrow(measure.pred))),
-                              value.t = I(rep(list(data.frame(matrix(NA_real_, ncol= 1, nrow = nrepeat))), 
+                              value.v = I(rep(list(data.frame(matrix(NA_real_, ncol= 1, nrow = nrepeat))), 
                                               times = nrow(measure.pred))),
                               value.Q2.total = I(rep(list(data.frame(matrix(NA_real_, ncol= 1, nrow = nrepeat))), 
                                               times = nrow(measure.pred)))
@@ -209,8 +207,6 @@ tune.spls <-
         measure.pred[
             measure.pred$measure != measure
           ,]$optimum.keepA <- NA
-        
-        
         
             for (comp in seq_len(ncomp)){
               # TODO tune.pls progressBar should use perf
@@ -247,9 +243,9 @@ tune.spls <-
                                       measure.pred[measure.pred$comp == comp & 
                                                      measure.pred$keepX == test.keepX[keepX] &
                                                      measure.pred$keepY == test.keepY[keepY] &
-                                                     # measure.pred$V == v &
+                                                     measure.pred$V == v &
                                                      measure.pred$measure == measure
-                                                   ,][[paste0('value.',v)]] <- measure.vpred$values
+                                                   ,]$value.v<- measure.vpred$values
          
                                       
                                     }
@@ -259,7 +255,8 @@ tune.spls <-
                                     
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &
-                                                   measure.pred$keepY == test.keepY[keepY]
+                                                   measure.pred$keepY == test.keepY[keepY] &
+                                                   measure.pred$V == 'u' 
                                                  ,]$value.Q2.total <- value.Q2.total
                                     
                                   }
@@ -267,26 +264,26 @@ tune.spls <-
                                   ## optimum only uses measure
                             optimum.u <- measure.pred[measure.pred$comp == comp & 
                                                         measure.pred$optimum.keepA == TRUE &
-                                                        # measure.pred$V == v &
+                                                        measure.pred$V == 'u' &
                                                         measure.pred$measure == measure
-                                                      ,]$value.u[[1]]
+                                                      ,]$value.v[[1]]
                             optimum.t <- measure.pred[measure.pred$comp == comp & 
                                                         measure.pred$optimum.keepA == TRUE &
-                                                        # measure.pred$V == v &
+                                                        measure.pred$V == 't' &
                                                         measure.pred$measure == measure
-                                                      ,]$value.t[[1]]
+                                                      ,]$value.v[[1]]
                             value.u <- measure.pred[measure.pred$comp == comp & 
                                                       measure.pred$keepX == test.keepX[keepX] &
                                                       measure.pred$keepY == test.keepY[keepY] &
-                                                      # measure.pred$V == v &
+                                                      measure.pred$V == 'u' &
                                                       measure.pred$measure == measure
-                                                    ,]$value.u[[1]]
+                                                    ,]$value.v[[1]]
                             value.t <- measure.pred[measure.pred$comp == comp & 
                                                       measure.pred$keepX == test.keepX[keepX] &
                                                       measure.pred$keepY == test.keepY[keepY] &
-                                                      # measure.pred$V == v &
+                                                      measure.pred$V == 't' &
                                                       measure.pred$measure == measure
-                                                    ,]$value.t[[1]]
+                                                    ,]$value.v[[1]]
          
                                   # if (nrepeat > 2) {
                                     ## workaround for constant values in t.test # TODO handle it properly
@@ -327,19 +324,18 @@ tune.spls <-
                                   }
                                 # }
                                 
-                              # TODO drop Q2 as we dropped tune.pls
-
-                            # Q2.total <-  Reduce('+', Q2.total)/nrepeat
                         } # end keepY
                     } #end keepX
   
               choice.keepX.ncomp <-  measure.pred[measure.pred$comp == comp & 
                                                     measure.pred$optimum.keepA == TRUE &
-                                                    measure.pred$measure == measure
+                                                    measure.pred$measure == measure & 
+                                                    measure.pred$V == 't' ## doesn't matter t or u
                                                   ,]$keepX
               choice.keepY.ncomp <-  measure.pred[measure.pred$comp == comp & 
                                                     measure.pred$optimum.keepA == TRUE &
-                                                    measure.pred$measure == measure
+                                                    measure.pred$measure == measure &
+                                                    measure.pred$V == 't'
                                                   ,]$keepY
               choice.keepX = c(choice.keepX, choice.keepX.ncomp)
               choice.keepY = c(choice.keepY, choice.keepY.ncomp)
@@ -351,11 +347,13 @@ tune.spls <-
         {
           Q2.total <- measure.pred[measure.pred$comp == comp & 
                                      measure.pred$keepX == test.keepX[keepX] &
-                                     measure.pred$keepY == test.keepY[keepY]
+                                     measure.pred$keepY == test.keepY[keepY] &
+                                     measure.pred$V == 'u'
                                    ,]$value.Q2.total[[1]]
           Q2.opt <- measure.pred[measure.pred$comp == choice.ncomp & 
                                      measure.pred$keepX == test.keepX[keepX] &
-                                     measure.pred$keepY == test.keepY[keepY]
+                                     measure.pred$keepY == test.keepY[keepY] &
+                                   measure.pred$V == 'u'
                                    ,]$value.Q2.total[[1]]
           keep.comp <- mean(Q2.total) >= limQ2
           if (keep.comp)
@@ -366,20 +364,15 @@ tune.spls <-
         out$choice.keepY = choice.keepY
         out$choice.ncomp = choice.ncomp
         
-        ## helper to add mean/sd of values
-        .stat_summ <- function(vec_list, stat = c(mean, sd)) {
-          stat <- match.arg(stat)
-          sapply(vec_list, function(vec) {
-            if (!any(is.na(vec))) stat(vec) else NA_real_
-          })
-        }
+        ## add mean and sd
+        val <- unclass(measure.pred$value.v)
+        measure.pred$mean <- sapply(measure.pred$value.v, function(x){
+          mean(c(as.matrix(x)), na.rm = TRUE)
+        })
         
-        measure.pred <- mutate(measure.pred,
-          mean.u = mean(value.u[[1]], na.rm = TRUE),
-          sd.u = sd(value.u[[1]], na.rm = TRUE),
-          mean.t = mean(value.t[[1]], na.rm = TRUE),
-          sd.t = sd(value.t[[1]], na.rm = TRUE),
-        )
+        measure.pred$sd <- sapply(measure.pred$value.v, function(x){
+          sd(c(as.matrix(x)), na.rm = TRUE)
+        })
         
         out$measure.pred = measure.pred
         ### evaluate all for output except X and Y to save memory
