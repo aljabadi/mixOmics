@@ -124,7 +124,7 @@ plot.tune.spls1 <-
             df$upr = df$y + dferror$value
             
             #adding the error bar to the plot
-            p = p + geom_errorbar(data=df,aes(ymin=lwr, ymax=upr), width = 0.08)
+            p = p + geom_errorbar(data=df,aes(ymin=lwr, ymax=upr), width = 0.04)
         }
         
         if(optimal)
@@ -211,7 +211,7 @@ plot.tune.splsda <- plot.tune.spls1
 #' @example ./examples/plot.perf-examples.R
 plot.perf.pls.mthd <-
     function (x,
-              criterion = "MSEP",
+              criterion = "MSEP", # TODO homogenise the use of criterion/measure in methods and functions
               xlab = "Number of components",
               ylab = NULL,
               LimQ2 = 0.0975,
@@ -279,8 +279,11 @@ plot.perf.pls.mthd <-
         }
             
         
-        p <- p + geom_point(shape = pch, col = col, size = pch.size) 
+        p <- p + geom_point(shape = pch, col = col, size = pch.size)  +
+            scale_x_continuous(breaks = as.integer(sort(unique(df$comp))))
         
+        if (grepl('^cor', criterion)) ## correlation
+            p <- p + ylim(c(min(0, df$lower), max(1, df$upper)))
         if (sd)
             if (any (is.na(df$sd)))
                 message("error bars cannot be calculated as nrepeat < 3")

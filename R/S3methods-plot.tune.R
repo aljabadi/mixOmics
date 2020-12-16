@@ -117,7 +117,7 @@ plot.tune.spls <-
             {
                 df$lower <- df$mean - df$sd
                 df$upper <- df$mean + df$sd
-                p <- p + geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.08)
+                p <- p + geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.04)
             }
             p <- p + scale_color_gradient(low = 'blue', high = 'red', na.value = color.mixo(1)) + 
                 labs(x = keepA, y = measure, col = 'SD') +
