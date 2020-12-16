@@ -9,19 +9,21 @@
 \alias{plot.perf.mint.plsda.mthd}
 \alias{plot.perf.mint.splsda.mthd}
 \alias{plot.perf.sgccda.mthd}
-\alias{plot.perf.pls1.mthd}
-\alias{plot.perf.spls1.mthd}
 \title{Plot for model performance}
 \usage{
 \method{plot}{perf.pls.mthd}(
   x,
-  criterion = "Q2",
-  xlab = "number of components",
+  criterion = "MSEP",
+  xlab = "Number of components",
   ylab = NULL,
   LimQ2 = 0.0975,
-  LimQ2.col = "darkgrey",
-  cTicks = NULL,
-  layout = NULL,
+  LimQ2.col = "grey30",
+  sd = TRUE,
+  pch = 1,
+  pch.size = 3,
+  cex = 1.2,
+  col = color.mixo(1),
+  title = NULL,
   ...
 )
 
@@ -103,27 +105,19 @@
   ...
 )
 
-\method{plot}{perf.pls1.mthd}(
+\method{plot}{perf.pls.mthd}(
   x,
   criterion = "MSEP",
-  xlab = "number of components",
+  xlab = "Number of components",
   ylab = NULL,
   LimQ2 = 0.0975,
-  LimQ2.col = "darkgrey",
-  cTicks = NULL,
-  layout = NULL,
-  ...
-)
-
-\method{plot}{perf.spls1.mthd}(
-  x,
-  criterion = "MSEP",
-  xlab = "number of components",
-  ylab = NULL,
-  LimQ2 = 0.0975,
-  LimQ2.col = "darkgrey",
-  cTicks = NULL,
-  layout = NULL,
+  LimQ2.col = "grey30",
+  sd = TRUE,
+  pch = 1,
+  pch.size = 3,
+  cex = 1.2,
+  col = color.mixo(1),
+  title = NULL,
   ...
 )
 }
@@ -143,6 +137,14 @@ model. Default is \code{LimQ2 = 0.0975}.}
 \item{LimQ2.col}{character string specifying the color for the \code{LimQ2}
 line to be plotted. If \code{"none"} the line will not be plotted.}
 
+\item{sd}{If 'nrepeat' was used in the call to 'perf', error bar shows the
+standard deviation if sd=TRUE}
+
+\item{col}{character (or symbol) color to be used, possibly vector. One
+color per distance \code{dist}.}
+
+\item{\dots}{Further arguments sent to \code{\link{xyplot}} function.}
+
 \item{cTicks}{integer vector. Axis tickmark locations for the used number of
 components. Default is \code{1:ncomp} (see \code{\link{perf}}).}
 
@@ -150,16 +152,11 @@ components. Default is \code{1:ncomp} (see \code{\link{perf}}).}
 columns in a multi panel display. If not specified, \code{plot.perf} tries
 to be intelligent.}
 
-\item{\dots}{Further arguments sent to \code{\link{xyplot}} function.}
-
 \item{dist}{prediction method applied in \code{perf} for \code{plsda} or
 \code{splsda}. See \code{\link{perf}}.}
 
 \item{measure}{Two misclassification measure are available: overall
 misclassification error \code{overall} or the Balanced Error Rate \code{BER}}
-
-\item{col}{character (or symbol) color to be used, possibly vector. One
-color per distance \code{dist}.}
 
 \item{overlay}{parameter to overlay graphs; if 'all', only one graph is
 shown with all outputs; if 'measure', a graph is shown per distance; if
@@ -167,9 +164,6 @@ shown with all outputs; if 'measure', a graph is shown per distance; if
 
 \item{legend.position}{position of the legend, one of "vertical" (only one
 column) or "horizontal" (two columns).}
-
-\item{sd}{If 'nrepeat' was used in the call to 'perf', error bar shows the
-standard deviation if sd=TRUE}
 
 \item{study}{Indicates which study-specific outputs to plot. A character
 vector containing some levels of \code{object$study}, "all.partial" to plot

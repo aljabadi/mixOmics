@@ -281,7 +281,7 @@ perf.mixo_pls <- function(object,
         #' @importFrom dplyr ungroup mutate group_by
         mat <- group_by(mat, feature, comp)
         mat <- mutate(mat, mean = mean(value), sd = sd(value))
-        mat <- dplyr::ungroup(mat)
+        mat <- ungroup(mat)
         as.data.frame(mat)
     } )
     
@@ -313,24 +313,17 @@ perf.mixo_pls <- function(object,
             out <- summarise(out, freq=round(mean(freq, na.rm = TRUE), digits = 2))
         })
         #' @importFrom dplyr ungroup
-        out <- dplyr::ungroup(out)
+        out <- ungroup(out)
         out <- out[order(out$freq, decreasing = TRUE),]
         as.data.frame(out)
     })
     result <- list(measures = result)
     result$features <- features
-    
-    method <- "pls1.mthd" # TODO plot uses different classes compared to print
-    # method <- ifelse(ncol(object$Y) == 1, "pls1.mthd", "pls.mthd")
-    #--- class
-    if (is(object,"mixo_spls"))
-    {
-        method = paste0('s', method)
-        # result$features <- .relist(result$features) # TODO
-    } 
-    result$method <-  ifelse(ncol(object$Y) == 1, "pls1", "pls2")
-    class(result) = c(paste(c("perf", method), collapse ="."), "perf")
-    result$call <- match.call()
+    mc <- mget(names(formals())[-1], sys.frame(sys.nframe()))
+    ## replace function, object with unevaluated call
+    mc <- as.call(c(as.list(match.call())[1:2], mc))
+    result <- c(list(call = mc), result)
+    class(result) <- "perf.pls.mthd"
     
     return(result)
     

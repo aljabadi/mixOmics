@@ -20,7 +20,6 @@
 \alias{print.sipca}
 \alias{print.sgccda}
 \alias{print.perf.pls.mthd}
-\alias{print.perf.spls.mthd}
 \alias{print.perf.plsda.mthd}
 \alias{print.perf.splsda.mthd}
 \alias{print.perf.mint.splsda.mthd}
@@ -69,8 +68,6 @@
 \method{print}{summary}(x, ...)
 
 \method{print}{perf.pls.mthd}(x, ...)
-
-\method{print}{perf.spls.mthd}(x, ...)
 
 \method{print}{perf.plsda.mthd}(x, ...)
 

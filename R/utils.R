@@ -631,8 +631,10 @@ nearZeroVar = function (x, freqCut = 95/5, uniqueCut = 10)
 #' @param background.fill background fill for plot
 #'
 #' @noRd
-mixo_gg.theme <- function(cex, x.angle = 90, background.fill = 'grey97') {
+mixo_gg.theme <- function(cex, x.angle = 90, background.fill = 'grey97', subtitle.cex = NULL) {
+    subtitle.cex <- .change_if_null(subtitle.cex, cex)
     text.size <- as.integer(cex*10)
+    subtitle.text.size <- as.integer(subtitle.cex*10)
     theme(panel.border = element_blank(),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
@@ -647,6 +649,7 @@ mixo_gg.theme <- function(cex, x.angle = 90, background.fill = 'grey97') {
           legend.title =  element_text( size = text.size),
           plot.title = element_text(hjust = 0.5),
           # subtitles
-          strip.text = element_text(size = 1.3*text.size, face = 'bold')
+          strip.text = element_text(size = subtitle.text.size, 
+                                    face = 'bold')
     )
 }

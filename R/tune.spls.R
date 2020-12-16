@@ -229,7 +229,7 @@ tune.spls <-
                                               keepX = c(choice.keepX, test.keepX[keepX]), 
                                               keepY = c(choice.keepY, test.keepY[keepY]), 
                                               ncomp = comp, mode = mode, ...)
-                            browser()
+                            
                             pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
                             ## now that measure.pred is different for the two, account for it
 
@@ -239,7 +239,10 @@ tune.spls <-
                                     for (v in c('u', 't'))
                                     {
                                       ## populate the table for both measures
-                                      measure.vpred <- t(data.frame( pls.perf[[sprintf("%s.upred", measure, v)]]))
+                                      measure.vpred <- pls.perf$measures[[sprintf("%s.upred", measure, v)]]
+                                      #' @importFrom dplyr filter select
+                                      measure.vpred <- measure.vpred %>% filter(comp == comp) %>% select(mean)
+                                      measure.vpred <- t(measure.vpred)
                                       measure.pred[measure.pred$comp == comp & 
                                                      measure.pred$keepX == test.keepX[keepX] &
                                                      measure.pred$keepY == test.keepY[keepY] &
@@ -247,11 +250,15 @@ tune.spls <-
                                                      measure.pred$measure == measure
                                                    ,][[paste0('value.',v)]][[1]] <- measure.vpred
                                     }
+                                    value.Q2.total <- pls.perf$measures$Q2.total
+                                    #' @importFrom dplyr filter select
+                                    value.Q2.total <- value.Q2.total %>% filter(comp == comp) %>% select(mean)
+                                    value.Q2.total <- t(value.Q2.total)
                                     
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &
                                                    measure.pred$keepY == test.keepY[keepY]
-                                                 ,]$value.Q2.total[[1]] <- t(data.frame( pls.perf$Q2.total))
+                                                 ,]$value.Q2.total[[1]] <- value.Q2.total
                                     
                                   }
 
@@ -299,6 +306,7 @@ tune.spls <-
                                         }
                                       improved
                                     }
+                                    
                                     u.improved <-.check_improvement(opt = optimum.u, value = value.u, measure = measure, nrepeat = nrepeat)
                                     t.improved <-.check_improvement(opt = optimum.t, value = value.t, measure = measure, nrepeat = nrepeat)
                                     improved <- if (mode == 'canonical') u.improved & t.improved else u.improved
@@ -355,7 +363,22 @@ tune.spls <-
         out$choice.keepX = choice.keepX
         out$choice.keepY = choice.keepY
         out$choice.ncomp = choice.ncomp
-
+        
+        ## helper to add mean/sd of values
+        .stat_summ <- function(vec_list, stat = c(mean, sd)) {
+          stat <- match.arg(stat)
+          sapply(vec_list, function(vec) {
+            if (!any(is.na(vec))) stat(vec) else NA_real_
+          })
+        }
+        
+        measure.pred <- mutate(measure.pred,
+          mean.u = mean(value.u[[1]], na.rm = TRUE),
+          sd.u = sd(value.u[[1]], na.rm = TRUE),
+          mean.t = mean(value.t[[1]], na.rm = TRUE),
+          sd.t = sd(value.t[[1]], na.rm = TRUE),
+        )
+        
         out$measure.pred = measure.pred
         ### evaluate all for output except X and Y to save memory
         ## eval all but X and Y
@@ -363,7 +386,7 @@ tune.spls <-
         ## replace function, X and Y with unevaluated call
         mc <- as.call(c(as.list(match.call())[1:3], mc))
         out <- c(list(call = mc), out)
-        class <- c('tune.spls', 'tune.pls')
-        class(out) <- if (spls.model) class else rev(class)
+        class <- c('tune.pls')
+        class(out) <- if (spls.model) class <- c(class, 'tune.spls')
         return(out)
     } 

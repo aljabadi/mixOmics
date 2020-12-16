@@ -205,10 +205,10 @@ plot.tune.splsda <- plot.tune.spls1
 #' e1005752
 #' @keywords regression multivariate hplot
 #' @name plot.perf
-#' @method plot perf.pls1.mthd
+#' @method plot perf.pls.mthd
 #' @export
 #' @example ./examples/plot.perf-examples.R
-plot.perf.pls1.mthd <-
+plot.perf.pls.mthd <-
     function (x,
               criterion = "MSEP",
               xlab = "Number of components",
@@ -227,7 +227,7 @@ plot.perf.pls1.mthd <-
         if (length(criterion) > 1 || !(criterion %in% names(x$measures) ))
             stop("'criterion' must be one of names(", 
                  deparse(substitute(x)),"$measures): ", "\n", 
-                 paste(names(x$measures), collapse = ', '))
+                 paste(names(x$measures), collapse = ', '), call. = FALSE)
         df = x$measures[[criterion]]
         df <- df[!duplicated(df[,c(1,2,5,6)]),] ## only mean and sd
         repeated <- all(!is.na(df$sd))
@@ -291,8 +291,3 @@ plot.perf.pls1.mthd <-
         
         p
     }
-
-#' @rdname plot.perf
-#' @method plot perf.spls1.mthd
-#' @export
-plot.perf.spls1.mthd <- plot.perf.pls1.mthd
