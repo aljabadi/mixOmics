@@ -46,6 +46,7 @@ set.seed(33)
 nrep <- 3
 Q2.pls2.liver <- perf(tune.pls2.liver, validation = 'Mfold', 
                       folds = folds, nrepeat = nrep)
+debugonce(plot)
 plot(Q2.pls2.liver, criterion = 'RMSEP', sd = TRUE)
 
 #' #### print pls2

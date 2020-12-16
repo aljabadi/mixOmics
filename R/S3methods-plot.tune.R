@@ -69,6 +69,9 @@ plot.tune.spls <-
         } else {
             measure <- match.arg(measure, c('cor', 'RSS'))    
         }
+        df <- x$measure.pred[x$measure.pred$measure == measure,]
+        values <- grepl('value', colnames(df))
+        df <- df[,!values]
         # TODO what is the use of comp here
         uu <- x$measure.pred[x$measure.pred$measure == measure,]$value.u
         # uu$value.u <- lapply(uu$value.u, function(x)

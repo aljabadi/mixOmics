@@ -179,7 +179,7 @@ tune.spls <-
                                       # V = c('u', 't'),
                                       measure = c('cor', 'RSS'),
                                       comp = seq_len(ncomp),
-                                      optimum = FALSE)
+                                      optimum.keepA = FALSE)
         # } else {
         #   # Q2 only
         #   measure.pred <- expand.grid(
@@ -204,11 +204,11 @@ tune.spls <-
           measure.pred$keepX == test.keepX[1] &
             measure.pred$keepY == test.keepY[1] &
             measure.pred$measure == measure
-          ,]$optimum <- TRUE
+          ,]$optimum.keepA <- TRUE
         
         measure.pred[
             measure.pred$measure != measure
-          ,]$optimum <- NA
+          ,]$optimum.keepA <- NA
         
         
         
@@ -231,6 +231,7 @@ tune.spls <-
                                               ncomp = comp, mode = mode, ...)
                             
                             pls.perf <- perf(pls.model, validation = validation, folds = folds, nrepeat = nrepeat)
+                            ## why value.u/t is constant coming out of this?
                             ## now that measure.pred is different for the two, account for it
 
                                   for (measure in measure) # TODO drop it
@@ -241,35 +242,36 @@ tune.spls <-
                                       ## populate the table for both measures
                                       measure.vpred <- pls.perf$measures[[sprintf("%s.upred", measure, v)]]
                                       #' @importFrom dplyr filter select
-                                      measure.vpred <- measure.vpred %>% filter(comp == comp) %>% select(mean)
-                                      measure.vpred <- t(measure.vpred)
+                                      measure.vpred <- measure.vpred[measure.vpred$comp == comp,]
+             
                                       measure.pred[measure.pred$comp == comp & 
                                                      measure.pred$keepX == test.keepX[keepX] &
                                                      measure.pred$keepY == test.keepY[keepY] &
                                                      # measure.pred$V == v &
                                                      measure.pred$measure == measure
-                                                   ,][[paste0('value.',v)]][[1]] <- measure.vpred
+                                                   ,][[paste0('value.',v)]] <- measure.vpred$values
+         
+                                      
                                     }
                                     value.Q2.total <- pls.perf$measures$Q2.total
                                     #' @importFrom dplyr filter select
-                                    value.Q2.total <- value.Q2.total %>% filter(comp == comp) %>% select(mean)
-                                    value.Q2.total <- t(value.Q2.total)
+                                    value.Q2.total <- filter(value.Q2.total, comp == comp)$values
                                     
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &
                                                    measure.pred$keepY == test.keepY[keepY]
-                                                 ,]$value.Q2.total[[1]] <- value.Q2.total
+                                                 ,]$value.Q2.total <- value.Q2.total
                                     
                                   }
 
                                   ## optimum only uses measure
                             optimum.u <- measure.pred[measure.pred$comp == comp & 
-                                                        measure.pred$optimum == TRUE &
+                                                        measure.pred$optimum.keepA == TRUE &
                                                         # measure.pred$V == v &
                                                         measure.pred$measure == measure
                                                       ,]$value.u[[1]]
                             optimum.t <- measure.pred[measure.pred$comp == comp & 
-                                                        measure.pred$optimum == TRUE &
+                                                        measure.pred$optimum.keepA == TRUE &
                                                         # measure.pred$V == v &
                                                         measure.pred$measure == measure
                                                       ,]$value.t[[1]]
@@ -315,13 +317,13 @@ tune.spls <-
                                       ## set previous to FALSE
                                       measure.pred[measure.pred$comp == comp & 
                                                        measure.pred$measure == measure
-                                                   ,]$optimum <- FALSE
+                                                   ,]$optimum.keepA <- FALSE
                                       ## update optimum
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &
                                                    measure.pred$keepY == test.keepY[keepY] &
                                                    measure.pred$measure == measure
-                                                 ,]$optimum <- TRUE
+                                                 ,]$optimum.keepA <- TRUE
                                   }
                                 # }
                                 
@@ -332,11 +334,11 @@ tune.spls <-
                     } #end keepX
   
               choice.keepX.ncomp <-  measure.pred[measure.pred$comp == comp & 
-                                                    measure.pred$optimum == TRUE &
+                                                    measure.pred$optimum.keepA == TRUE &
                                                     measure.pred$measure == measure
                                                   ,]$keepX
               choice.keepY.ncomp <-  measure.pred[measure.pred$comp == comp & 
-                                                    measure.pred$optimum == TRUE &
+                                                    measure.pred$optimum.keepA == TRUE &
                                                     measure.pred$measure == measure
                                                   ,]$keepY
               choice.keepX = c(choice.keepX, choice.keepX.ncomp)

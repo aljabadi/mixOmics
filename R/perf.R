@@ -255,7 +255,7 @@ perf.mixo_pls <- function(object,
                           ...)
 {
     ncomp = object$ncomp
-
+    
     progressBar <- .check_logical(progressBar)
     
     # TODO add BPPARAM to args and use bplapply
@@ -270,28 +270,28 @@ perf.mixo_pls <- function(object,
     ## add nrepeat to matrices here
     ## change list hierarchy from entry within repeat to repeat within entry
     result <- .relist(result)
-
+    
     features <- result$features
     result$features <- NULL
-    
-    ## tidy df
-    result <- lapply(result, function(item){
-        mat <- melt(item)
-        colnames(mat) <- c('feature', 'comp', 'value', 'nrep')
-        #' @importFrom dplyr ungroup mutate group_by
-        mat <- group_by(mat, feature, comp)
-        mat <- mutate(mat, mean = mean(value), sd = sd(value))
-        mat <- ungroup(mat)
-        as.data.frame(mat)
-    } )
+    ## create a single data.frame with mean, sd and values
+    result <- lapply(result, function(measure){
+        df <- measure[[1]]
+        df$value <- NULL
+        df$values <- I(lapply(seq_len(nrow(df)), function(n_row){
+            out <- sapply(seq_len(nrepeat), function(nnrep) {
+                measure[[nnrep]]$value[n_row]
+            })
+           as.matrix(out)
+        }))
+        df$mean <- sapply(df$values, mean, na.rm = TRUE)
+        df$sd <- sapply(df$values, sd, na.rm = TRUE)
+        df
+    })
     
     features <- lapply(.name_list(names(features[[1]])), function(x){
         out <- lapply(seq_len(nrepeat), function(rep){
             features[[rep]][[x]][[1]]
         })
-        # TODO average and merge outside this loop
-        # out <- t(out)
-        # colnames(out) <- paste0('repeat_', seq_len(ncol(out)))
         out
     })
     
@@ -305,7 +305,7 @@ perf.mixo_pls <- function(object,
             ww
         })
     })
-    ## TODO Does this work if nrepeat = 1
+    
     features <- lapply(features, function(x){
         out <- Reduce(x, f = rbind)
         out <- group_by(out, feature)
@@ -328,7 +328,7 @@ perf.mixo_pls <- function(object,
     return(result)
     
 }
-    
+
 #' @rdname perf
 #' @export
 perf.mixo_spls  <- perf.mixo_pls
@@ -412,7 +412,7 @@ perf.mixo_spls  <- perf.mixo_pls
         folds = split(1:n, rep(1:n, length = n))
         M = n
     }
-
+    
     #-- initialize new objects --#
     if (mode == 'canonical'){
         RSS = rbind(rep(n - 1, p), matrix(nrow = ncomp, ncol = p))
@@ -452,7 +452,7 @@ perf.mixo_spls  <- perf.mixo_pls
         b = object$loadings$Y[, h]
         #nx = p - keepX[h]
         #ny = q - keepY[h]
-
+        
         # only used for matrices deflation across dimensions
         c = crossprod(X, tt)/drop(crossprod(tt))  #object$mat.c[, h]
         d = crossprod(Y, tt)/drop(crossprod(tt))  #object$mat.d[, h]
@@ -510,7 +510,7 @@ perf.mixo_spls  <- perf.mixo_pls
             
             # here h = 1 because we deflate at each step then extract the vectors for each h comp
             spls.res = spls(X.train[,nzv], Y.train, ncomp = 1, mode = mode, max.iter = max.iter, tol = tol, 
-                                      keepX = keepX.temp, keepY = keepY, near.zero.var = FALSE, scale = scale)
+                            keepX = keepX.temp, keepY = keepY, near.zero.var = FALSE, scale = scale)
             Y.hat = predict.mixo_spls(spls.res, X.test[,nzv, drop = FALSE])$predict
             
             # added the stop msg
@@ -557,7 +557,7 @@ perf.mixo_spls  <- perf.mixo_pls
                 Y.train = Y.train - t.cv %*% t(d.cv) # could be pred d.pred.cv? does not decrease enough
                 Y.test = Y.test - Y.hat[, , 1]   # == Y.test - t.pred %*% t(d.cv) 
             }
-
+            
             #-- mode canonical  ## KA added
             if (mode == "canonical"){
                 Y.train = Y.train - u.cv %*% t(e.cv)  # could be pred on e
@@ -659,7 +659,15 @@ perf.mixo_spls  <- perf.mixo_pls
             rownames(arr) <- measure
         arr
     }, SIMPLIFY = FALSE)
-
+    
+    ## melt by comp
+    result <- lapply(result,FUN = function(arr) {
+        arr <- melt(arr)
+        colnames(arr) <- c('feature', 'comp', 'value')
+        arr
+    })
+    
+    
     #---- extract stability of features -----#
     if (is(object, "mixo_spls"))
     {

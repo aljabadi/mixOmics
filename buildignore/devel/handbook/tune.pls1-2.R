@@ -11,7 +11,8 @@ tune.pls2.liver <- pls(X = X, Y = Y, ncomp = 4, mode = 'regression')
 list.keepX <- c(5, 15)
 list.keepY <- c(3, 8)
 
-
+options(error=recover)
+options(error=NULL)
 #' # PLS2
 
 #' ### nrepeat > 2
@@ -23,14 +24,8 @@ tune.spls2.liver <- tune.spls(X, Y, test.keepX = list.keepX,
                              mode = 'regression', measure = 'cor')
 
 #' #### print tune.pls2
-
-tune.spls2.liver$measure.pred$mean.u <- sapply(tune.spls2.liver$measure.pred$value.u, function(x) {
-    if (!any(is.na(x))) mean(x) else NA_real_
-})
-tune.spls2.liver$measure.pred$sd.u <- sapply(tune.spls2.liver$measure.pred$value.u, function(x) {
-    if (!any(is.na(x))) sd(x) else NA_real_
-})
+tune.spls2.liver
 
 #' #### plot tune.pls2
-
+debugonce(plot)
 plot(tune.spls2.liver)

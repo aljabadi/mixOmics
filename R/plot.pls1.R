@@ -215,7 +215,7 @@ plot.perf.pls.mthd <-
               ylab = NULL,
               LimQ2 = 0.0975,
               LimQ2.col = 'grey30',
-              sd = TRUE,
+              sd = NULL,
               pch = 1,
               pch.size = 3,
               cex = 1.2,
@@ -229,8 +229,9 @@ plot.perf.pls.mthd <-
                  deparse(substitute(x)),"$measures): ", "\n", 
                  paste(names(x$measures), collapse = ', '), call. = FALSE)
         df = x$measures[[criterion]]
-        df <- df[!duplicated(df[,c(1,2,5,6)]),] ## only mean and sd
+        df <- df[,c('feature', 'comp', 'mean', 'sd')]
         repeated <- all(!is.na(df$sd))
+        sd <- .change_if_null(sd, default = ifelse(repeated, TRUE, FALSE))
         if (is.null(ylab)) {
             ylab <- criterion
             if (ylab == 'R2')
