@@ -277,7 +277,6 @@ perf.mixo_pls <- function(object,
     ## tidy df
     result <- lapply(result, function(item){
         mat <- melt(item)
-        if (ncol(mat) > 4) browser()
         colnames(mat) <- c('feature', 'comp', 'value', 'nrep')
         #' @importFrom dplyr ungroup mutate group_by
         mat <- group_by(mat, feature, comp)

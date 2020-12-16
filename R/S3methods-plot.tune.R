@@ -70,7 +70,6 @@ plot.tune.spls <-
             measure <- match.arg(measure, c('cor', 'RSS'))    
         }
         # TODO what is the use of comp here
-        browser()
         uu <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,]
         # uu$value.u <- lapply(uu$value.u, function(x)
         tt <- x$measure.pred[x$measure.pred$measure == measure & x$measure.pred$comp == x$call$ncomp,]$value.t

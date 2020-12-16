@@ -24,7 +24,6 @@ tune.pls <-  function(X,
                               progressBar = progressBar, 
                               nrepeat = nrepeat)
     meaure <- result[[measure.tune]]
-    browser()
     result$call <- match.call()
         
         return(result)
