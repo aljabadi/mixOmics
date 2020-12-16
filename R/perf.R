@@ -687,7 +687,8 @@ perf.mixo_spls  <- perf.mixo_pls
         names(list.features.X)  = names(list.features.Y) = paste0("comp", seq_len(ncomp))
         # features
         result$features$stable.X = list.features.X
-        result$features$stable.Y = list.features.Y
+        if (ncol(object$Y) > 1)
+            result$features$stable.Y = list.features.Y
     }
     
     return(invisible(result))
