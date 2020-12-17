@@ -291,7 +291,7 @@ perf.mixo_pls <- function(object,
                       sd = sd(value, na.rm = TRUE)) %>% 
             as.data.frame()
         
-        list(value = df, summary = df.summ)
+        list(values = df, summary = df.summ)
     })
 
     ## ------ feature stability

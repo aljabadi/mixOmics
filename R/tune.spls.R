@@ -247,7 +247,7 @@ tune.spls <-
                                     for (v in c('u', 't'))
                                     {
                                       ## populate the table for both measures
-                                      measure.vpred <- pls.perf$measures[[sprintf("%s.upred", measure, v)]]
+                                      measure.vpred <- pls.perf$measures[[sprintf("%s.upred", measure, v)]]$values
                                       measure.vpred <- measure.vpred[measure.vpred$comp == comp,]
              
                                       measure.pred[measure.pred$comp == comp & 
@@ -255,12 +255,12 @@ tune.spls <-
                                                      measure.pred$keepY == test.keepY[keepY] &
                                                      measure.pred$V == v &
                                                      measure.pred$measure == measure
-                                                   ,]$value.v<- measure.vpred$values
+                                                   ,]$value.v<- measure.vpred$value
          
                                       
                                     }
-                                    value.Q2.total <- pls.perf$measures$Q2.total
-                                    value.Q2.total <- filter(value.Q2.total, comp == comp)$values
+                                    value.Q2.total <- pls.perf$measures$Q2.total$values
+                                    value.Q2.total <- filter(value.Q2.total, comp == comp)$value
                                     
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &

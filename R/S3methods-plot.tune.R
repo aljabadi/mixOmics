@@ -80,9 +80,9 @@ plot.tune.spls <-
             p <- ggplot(df, aes(factor(keepX), factor(keepY))) + 
                 geom_point(aes_string(size = 'mean', col = 'sd'), shape = pch) + 
                 scale_color_gradient(low = 'blue', high = 'red', na.value = color.mixo(1))
-                
+            
             ## optimal keepX/keepY
-                p <- p + geom_point(data = df[df$optimal,], 
+                p <- p + geom_point(data = df[df$optimum.keepA,], 
                                     aes(factor(keepX), factor(keepY), size = mean*1.3), 
                                     shape = 0, 
                                     col = 'green', 
@@ -124,7 +124,7 @@ plot.tune.spls <-
                 facet_grid(.~comp, scales = 'free')
             
             ## optimal
-            df_opt <- df[df$optimal,]
+            df_opt <- df[df$optimum.keepA,]
             p <- p + geom_point(data = df_opt, 
                                 aes_string(x = keepA, y = 'mean'), 
                                 size = cex*1.2,
