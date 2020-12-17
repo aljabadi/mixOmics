@@ -265,7 +265,7 @@ perf.mixo_pls <- function(object,
         if (progressBar == TRUE) # TODO drop for parallel
             .progressBar(repeat_i/nrepeat)
         ## CV
-        .perf.mixo_pls_cv(object, validation = validation, folds = folds)
+        .perf.mixo_pls_cv(object, validation = validation, folds = folds, repeat_i = repeat_i)
     })
     ## add nrepeat to matrices here
     ## change list hierarchy from entry within repeat to repeat within entry
@@ -661,15 +661,22 @@ perf.mixo_spls  <- perf.mixo_pls
     }, SIMPLIFY = FALSE)
     
     ## melt by comp
-    result <- lapply(result,FUN = function(arr) {
+    result <- lapply(result, FUN = function(arr, repeat_i) {
         arr <- melt(arr)
         colnames(arr) <- c('feature', 'comp', 'value')
-        if (nrow(arr) == 1) ## for Y-level measures (ass opossed to Y_feature level) such as Q2.total
-            arr$feature <- 'Y'
+        if (nlevels(arr$feature) == 1) ## for Y-level measures (ass opossed to Y_feature level) such as Q2.total
+            arr$feature <- factor('Y')
+        arr$nrep <- repeat_i
         arr
-    })
+    }, repeat_i = repeat_i)
     
+    names(result) <- paste0('repeat_', seq_along(result))
+    col.names <- names(result[[1]])
+    #' @importFrom reshape2 melt
+    result <- melt(result, id.vars = col.names)
+    colnames(result) <- c(col.names, 'nrep')
     
+    result <- list(measures = result)
     #---- extract stability of features -----#
     if (is(object, "mixo_spls"))
     {
