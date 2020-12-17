@@ -247,7 +247,7 @@ tune.spls <-
                                     for (v in c('u', 't'))
                                     {
                                       ## populate the table for both measures
-                                      measure.vpred <- pls.perf$measures[[sprintf("%s.upred", measure, v)]]$values
+                                      measure.vpred <- pls.perf$measures[[sprintf("%s.%spred", measure, v)]]$values
                                       measure.vpred <- measure.vpred[measure.vpred$comp == comp,]
              
                                       measure.pred[measure.pred$comp == comp & 
