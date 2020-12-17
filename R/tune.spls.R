@@ -209,15 +209,12 @@ tune.spls <-
         use_progressBar <- progressBar & (is(BPPARAM, 'SerialParam'))
         n_keepA <- length(test.keepX) * length(test.keepY)
         
+        ## initialise optimal keepX/Y
+        measure.pred$optimum.keepA <- FALSE 
         measure.pred[
           measure.pred$keepX == test.keepX[1] &
-            measure.pred$keepY == test.keepY[1] &
-            measure.pred$measure == measure
+            measure.pred$keepY == test.keepY[1]
           ,]$optimum.keepA <- TRUE
-        
-        measure.pred[
-            measure.pred$measure != measure
-          ,]$optimum.keepA <- NA
         
             for (comp in seq_len(ncomp)){
               # TODO tune.pls progressBar should use perf
@@ -241,20 +238,20 @@ tune.spls <-
                             ## why value.u/t is constant coming out of this?
                             ## now that measure.pred is different for the two, account for it
 
-                                  for (measure in measure) # TODO drop it
+                                  for (measure_i in c('cor', 'RSS')) ## calculate both but use measure only
                                   {
                                     
                                     for (v in c('u', 't'))
                                     {
                                       ## populate the table for both measures
-                                      measure.vpred <- pls.perf$measures[[sprintf("%s.%spred", measure, v)]]$values
+                                      measure.vpred <- pls.perf$measures[[sprintf("%s.%spred", measure_i, v)]]$values
                                       measure.vpred <- measure.vpred[measure.vpred$comp == comp,]
              
                                       measure.pred[measure.pred$comp == comp & 
                                                      measure.pred$keepX == test.keepX[keepX] &
                                                      measure.pred$keepY == test.keepY[keepY] &
                                                      measure.pred$V == v &
-                                                     measure.pred$measure == measure
+                                                     measure.pred$measure == measure_i
                                                    ,]$value.v<- measure.vpred$value
          
                                       
@@ -294,7 +291,6 @@ tune.spls <-
                                                       measure.pred$measure == measure
                                                     ,]$value.v[[1]]
          
-                                  # if (nrepeat > 2) {
                                     ## workaround for constant values in t.test # TODO handle it properly
                                     offset.eps <- seq(1, 2, length.out = length(optimum.u))/1e6
                                     optimum.t <- optimum.t + offset.eps
@@ -321,17 +317,14 @@ tune.spls <-
                                   if (improved)
                                   {
                                       ## set previous to FALSE
-                                      measure.pred[measure.pred$comp == comp & 
-                                                       measure.pred$measure == measure
+                                      measure.pred[measure.pred$comp == comp
                                                    ,]$optimum.keepA <- FALSE
                                       ## update optimum
                                     measure.pred[measure.pred$comp == comp & 
                                                    measure.pred$keepX == test.keepX[keepX] &
-                                                   measure.pred$keepY == test.keepY[keepY] &
-                                                   measure.pred$measure == measure
+                                                   measure.pred$keepY == test.keepY[keepY]
                                                  ,]$optimum.keepA <- TRUE
                                   }
-                                # }
                                 
                         } # end keepY
                     } #end keepX
