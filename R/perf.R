@@ -267,6 +267,7 @@ perf.mixo_pls <- function(object,
         ## CV
         .perf.mixo_pls_cv(object, validation = validation, folds = folds, repeat_i = repeat_i)
     })
+    
     ## add nrepeat to matrices here
     ## change list hierarchy from entry within repeat to repeat within entry
     result <- .relist(result)
@@ -338,6 +339,7 @@ perf.mixo_spls  <- perf.mixo_pls
 .perf.mixo_pls_cv <- function(object,
                               validation = c("Mfold", "loo"),
                               folds,
+                              repeat_i= 1,
                               ...)
 {
     # changes to bypass the loop for the Q2
@@ -669,12 +671,10 @@ perf.mixo_spls  <- perf.mixo_pls
         arr$nrep <- repeat_i
         arr
     }, repeat_i = repeat_i)
-    
-    names(result) <- paste0('repeat_', seq_along(result))
     col.names <- names(result[[1]])
     #' @importFrom reshape2 melt
     result <- melt(result, id.vars = col.names)
-    colnames(result) <- c(col.names, 'nrep')
+    colnames(result) <- c(col.names, 'measure')
     
     result <- list(measures = result)
     #---- extract stability of features -----#
