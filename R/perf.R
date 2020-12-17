@@ -664,6 +664,8 @@ perf.mixo_spls  <- perf.mixo_pls
     result <- lapply(result,FUN = function(arr) {
         arr <- melt(arr)
         colnames(arr) <- c('feature', 'comp', 'value')
+        if (nrow(arr) == 1) ## for Y-level measures (ass opossed to Y_feature level) such as Q2.total
+            arr$feature <- 'Y'
         arr
     })
     
