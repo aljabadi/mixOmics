@@ -229,7 +229,7 @@ plot.perf.pls.mthd <-
             stop("'criterion' must be one of names(", 
                  deparse(substitute(x)),"$measures): ", "\n", 
                  paste(names(x$measures), collapse = ', '), call. = FALSE)
-        df = x$measures[[criterion]]
+        df = x$measures[[criterion]]$summary
         df <- df[,c('feature', 'comp', 'mean', 'sd')]
         repeated <- all(!is.na(df$sd))
         sd <- .change_if_null(sd, default = ifelse(repeated, TRUE, FALSE))

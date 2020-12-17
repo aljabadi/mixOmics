@@ -255,71 +255,76 @@ perf.mixo_pls <- function(object,
                           ...)
 {
     ncomp = object$ncomp
-    
+    spls.model <- is(object, 'mixo_spls')
     progressBar <- .check_logical(progressBar)
     
     # TODO add BPPARAM to args and use bplapply
     repeat_names <- .name_list(char = seq_len(nrepeat))
-    result <- lapply(X = repeat_names, FUN = function(repeat_i) {
+    result <- lapply(X = repeat_names, FUN = function(nrep) {
         ## progress bar
         if (progressBar == TRUE) # TODO drop for parallel
-            .progressBar(repeat_i/nrepeat)
+            .progressBar(nrep/nrepeat)
         ## CV
-        .perf.mixo_pls_cv(object, validation = validation, folds = folds, repeat_i = repeat_i)
+        .perf.mixo_pls_cv(object, validation = validation, folds = folds, nrep = nrep)
     })
     
-    ## add nrepeat to matrices here
-    ## change list hierarchy from entry within repeat to repeat within entry
-    result <- .relist(result)
+    measures <- lapply(result, function(x){
+        x$measures
+    })
     
-    features <- result$features
-    result$features <- NULL
-    ## create a single data.frame with mean, sd and values
-    result <- lapply(result, function(measure){
-        df <- measure[[1]]
-        df$value <- NULL
-        df$values <- I(lapply(seq_len(nrow(df)), function(n_row){
-            out <- sapply(seq_len(nrepeat), function(nnrep) {
-                measure[[nnrep]]$value[n_row]
+    measures <- Reduce(rbind, measures)
+    measures <- as.data.frame(measures)
+    
+    measure.names <- .name_list(unique(measures$measure))
+    measures <- lapply(measure.names, function(meas) {
+        
+        ## ------ value of measures across repeats
+        df <- measures %>% 
+            filter(measure == meas) %>% 
+            mutate(measure = NULL) %>% 
+            as.data.frame()
+        
+        ## ------ summary of measures across repeats
+        df.summ <- df %>%  
+            group_by(feature, comp) %>% 
+            summarise(mean = mean(value, na.rm = TRUE), 
+                      sd = sd(value, na.rm = TRUE)) %>% 
+            as.data.frame()
+        
+        list(value = df, summary = df.summ)
+    })
+
+    ## ------ feature stability
+    if (spls.model)
+    {
+        features <- lapply(result, function(x){
+            x$features
+        })
+        
+        features <- Reduce(rbind, features) %>% 
+            group_by(feature, comp, block) %>% 
+            summarise(stability = mean(stability, na.rm = TRUE))
+        
+        features <- as.data.frame(features)
+        features <- lapply(list(stability.X = 'X', stability.Y = 'Y'), function(z){
+            lapply(.name_list(unique(features$comp)), function(n.comp){
+                
+                df <- features %>% 
+                    filter(block == z & comp == n.comp) %>% 
+                    #' @importFrom dplyr select
+                    dplyr::select(feature, stability)
+                vec <- df$stability
+                names(vec) <- df$feature
+                sort(vec, decreasing = TRUE)
             })
-           as.matrix(out)
-        }))
-        df$mean <- sapply(df$values, mean, na.rm = TRUE)
-        df$sd <- sapply(df$values, sd, na.rm = TRUE)
-        df
-    })
-    
-    features <- lapply(.name_list(names(features[[1]])), function(x){
-        out <- lapply(seq_len(nrepeat), function(rep){
-            features[[rep]][[x]][[1]]
         })
-        out
-    })
+    } else
+    {
+        features <- NULL
+    }
     
-    
-    features <- lapply(features, function(z) {
-        res <- lapply(seq_along(z), function(w) {
-            ww <- data.frame(z[[w]])
-            colnames(ww) <- c('feature', 'freq')
-            ww$rep <- w
-            rownames(ww) <- NULL
-            ww
-        })
-    })
-    
-    features <- lapply(features, function(x){
-        out <- Reduce(x, f = rbind)
-        out <- group_by(out, feature)
-        suppressMessages({
-            out <- summarise(out, freq=round(mean(freq, na.rm = TRUE), digits = 2))
-        })
-        #' @importFrom dplyr ungroup
-        out <- ungroup(out)
-        out <- out[order(out$freq, decreasing = TRUE),]
-        as.data.frame(out)
-    })
-    result <- list(measures = result)
-    result$features <- features
+    result <- list(measures = measures,
+                   features = features)
     mc <- mget(names(formals())[-1], sys.frame(sys.nframe()))
     ## replace function, object with unevaluated call
     mc <- as.call(c(as.list(match.call())[1:2], mc))
@@ -339,7 +344,7 @@ perf.mixo_spls  <- perf.mixo_pls
 .perf.mixo_pls_cv <- function(object,
                               validation = c("Mfold", "loo"),
                               folds,
-                              repeat_i= 1,
+                              nrep = 1,
                               ...)
 {
     # changes to bypass the loop for the Q2
@@ -439,11 +444,20 @@ perf.mixo_spls  <- perf.mixo_pls
     t.pred.cv = matrix(nrow = nrow(X), ncol = ncomp)
     u.pred.cv = matrix(nrow = nrow(X), ncol = ncomp)
     
-    # to record feature stability 
-    featuresX  = featuresY =  list()
-    for(k in 1:ncomp){
-        featuresX[[k]] = featuresY[[k]] = NA
-    }
+    # to record feature stability, a list of form
+    # list(X = list(comp1 = c(feature1 = 0.99, ...), 
+    #               comp2 = c(feature2 = 0.98, ...)), 
+    #      Y = ...)
+    features <-
+        lapply(list(X = X, Y = Y), function(Z){
+            features <- vector(mode = 'numeric', length = ncol(Z))
+            names(features) <- colnames(Z)
+            features <- lapply(seq_len(ncomp), function(x) features)
+            names(features) <- paste0('comp', seq_len(ncomp))
+            
+            return(features)
+        })
+    
     
     # ====  loop on h = ncomp is only for the calculation of Q2 on each component
     for (h in 1:ncomp)
@@ -580,13 +594,15 @@ perf.mixo_spls  <- perf.mixo_pls
             # Record selected features in each set
             if (is(object,"mixo_spls"))
             {
-                featuresX[[h]] = c(unlist(featuresX[[h]]), selectVar(spls.res, comp = 1)$X$name)
-                featuresY[[h]] = c(unlist(featuresY[[h]]), selectVar(spls.res, comp = 1)$Y$name)
+                X.feature <- as.numeric(names(features$X[[h]]) %in% selectVar(spls.res, comp = 1)$X$name)
+                Y.feature <- as.numeric(names(features$Y[[h]]) %in% selectVar(spls.res, comp = 1)$Y$name)
+                # TODO using comp = 1 after deflation: this is problematic if, say, folds = 3, keepX = c(2, 100) (max 4 features (2 folds x 2 features) should be output for comp2 before calculating stability)
+                features$X[[h]] <- features$X[[h]] + X.feature / length(folds)
+                features$Y[[h]] <- features$Y[[h]] + Y.feature / length(folds)
             }
             
         } #  end loop on h ncomp
     } # end i (cross validation)
-    
     
     
     # store results for each comp
@@ -663,43 +679,37 @@ perf.mixo_spls  <- perf.mixo_pls
     }, SIMPLIFY = FALSE)
     
     ## melt by comp
-    result <- lapply(result, FUN = function(arr, repeat_i) {
+    result <- lapply(result, FUN = function(arr, nrep) {
         arr <- melt(arr)
         colnames(arr) <- c('feature', 'comp', 'value')
         if (nlevels(arr$feature) == 1) ## for Y-level measures (ass opossed to Y_feature level) such as Q2.total
             arr$feature <- factor('Y')
-        arr$nrep <- repeat_i
+        arr$nrep <- nrep
         arr
-    }, repeat_i = repeat_i)
+    }, nrep = nrep)
     col.names <- names(result[[1]])
     #' @importFrom reshape2 melt
     result <- melt(result, id.vars = col.names)
     colnames(result) <- c(col.names, 'measure')
     
     result <- list(measures = result)
-    #---- extract stability of features -----#
+    #---- stability of features -----#
     if (is(object, "mixo_spls"))
     {
-        list.features.X = list()
-        list.features.Y = list()
-        
-        for(k in 1:ncomp)
+        features <- lapply(features, function(x)
         {
-            #remove the NA value that was added for initialisation
-            remove.naX = which(is.na(featuresX[[k]]))
-            remove.naY = which(is.na(featuresY[[k]]))
-            # then summarise as a factor and output the percentage of appearance
-            list.features.X[[k]] = sort(table(as.factor(featuresX[[k]][-remove.naX])) / M, decreasing = TRUE)
-            list.features.Y[[k]] = sort(table(as.factor(featuresY[[k]][-remove.naY])) / M, decreasing = TRUE)
-            
-        }
-        names(list.features.X)  = names(list.features.Y) = paste0("comp", seq_len(ncomp))
-        # features
-        result$features$stable.X = list.features.X
-        if (ncol(object$Y) > 1)
-            result$features$stable.Y = list.features.Y
+            x <- lapply(x, function(stab) round(stab, 2))
+            df <- data.frame(x)
+            df <- data.frame(feature = rownames(df), df)
+            df
+        })
+        features <- melt(features, id.vars = 'feature', value.name = 'stability', variable.name = 'comp')
+        ## add block name column instead of default 'L1'
+        colnames(features) <- c(rev(rev(colnames(features))[-1]), 'block')
+        features$nrep <- nrep
+        
+        result$features <- features
     }
-    
     return(invisible(result))
 }
 
