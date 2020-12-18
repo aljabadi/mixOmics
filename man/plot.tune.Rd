@@ -9,7 +9,16 @@
 \alias{plot.tune.spls1}
 \title{Plot model performance}
 \usage{
-\method{plot}{tune.spls}(x, measure = NULL, comp = c(1, 2), pch = 16, cex = 1.2, title = NULL, ...)
+\method{plot}{tune.spls}(
+  x,
+  measure = NULL,
+  comp = c(1, 2),
+  pch = 16,
+  cex = 1.2,
+  title = NULL,
+  size.range = c(3, 10),
+  ...
+)
 
 \method{plot}{tune.splsda}(x, optimal = TRUE, sd = TRUE, col, ...)
 
