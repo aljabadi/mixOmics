@@ -526,7 +526,7 @@ perf.mixo_spls  <- perf.mixo_pls
             
             # here h = 1 because we deflate at each step then extract the vectors for each h comp
             spls.res = spls(X.train[,nzv], Y.train, ncomp = 1, mode = mode, max.iter = max.iter, tol = tol, 
-                            keepX = keepX.temp, keepY = keepY, near.zero.var = FALSE, scale = scale)
+                            keepX = keepX.temp[h], keepY = keepY[h], near.zero.var = FALSE, scale = scale)
             Y.hat = predict.mixo_spls(spls.res, X.test[,nzv, drop = FALSE])$predict
             
             # added the stop msg
