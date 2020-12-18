@@ -517,17 +517,21 @@ perf.mixo_spls  <- perf.mixo_pls
             #{
             #nzv = (apply(X.train, 2, var) > .Machine$double.eps) # removed in v6.0.0 so that MSEP, R2 and Q2 are obtained with the same data
             # re-added in >6.1.3 to remove constant variables
-            nzv = (apply(X.train, 2, var) > .Machine$double.eps)
+            nzv.X = (apply(X.train, 2, var) > .Machine$double.eps)
+            nzv.Y = (apply(Y.train, 2, var) > .Machine$double.eps)
             
-            # creating a keepX.temp that can change for each fold, depending on nzv
+            # creating a keepX/Y.temp that can change for each fold, depending on nzv.X/Y
             keepX.temp = keepX
-            if(any(keepX.temp > sum(nzv)))
-                keepX.temp[which(keepX.temp>sum(nzv))] = sum(nzv)
-            
+            keepY.temp = keepY
+            if(any(keepX.temp > sum(nzv.X)))
+                keepX.temp[which(keepX.temp>sum(nzv.X))] = sum(nzv.X)
+            if(any(keepY.temp > sum(nzv.Y)))
+                keepY.temp[which(keepY.temp>sum(nzv.Y))] = sum(nzv.Y)
+            # TODO clarify the iterative nzv process in docs -- give it a better name (these are actually !nzv)
             # here h = 1 because we deflate at each step then extract the vectors for each h comp
-            spls.res = spls(X.train[,nzv], Y.train, ncomp = 1, mode = mode, max.iter = max.iter, tol = tol, 
-                            keepX = keepX.temp[h], keepY = keepY[h], near.zero.var = FALSE, scale = scale)
-            Y.hat = predict.mixo_spls(spls.res, X.test[,nzv, drop = FALSE])$predict
+            spls.res = spls(X.train[, nzv.X, drop = FALSE], Y.train[, nzv.Y, drop = FALSE], ncomp = 1, mode = mode, max.iter = max.iter, tol = tol, 
+                            keepX = keepX.temp[h], keepY = keepY.temp[h], near.zero.var = FALSE, scale = scale)
+            Y.hat = predict.mixo_spls(spls.res, X.test[, nzv.X, drop = FALSE])$predict
             
             # added the stop msg
             if(sum(is.na(Y.hat))>0) stop('Predicted Y values include NA')  
