@@ -653,3 +653,15 @@ mixo_gg.theme <- function(cex, x.angle = 90, background.fill = 'grey97', subtitl
                                     face = 'bold')
     )
 }
+
+#' Format text with colour to input into cat
+#' 
+#' @example cat(.colour.txt('foo'))
+#' @noRd
+#' @keywords Internal
+.colour.txt <- function(char, sQuote = TRUE) {
+    if (sQuote) ## add single quotes around char
+        sprintf("\033[33m'%s'\033[39m", char)
+    else
+        sprintf("\033[33m%s\033[39m", char)
+}
