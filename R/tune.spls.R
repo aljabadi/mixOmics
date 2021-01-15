@@ -246,13 +246,12 @@ tune.spls <-
                                       ## populate the table for both measures
                                       measure.vpred <- pls.perf$measures[[sprintf("%s.%spred", measure_i, v)]]$values
                                       measure.vpred <- measure.vpred[measure.vpred$comp == comp,]
-             
-                                      measure.pred[measure.pred$comp == comp & 
+                                      measure.pred[measure.pred$comp == comp &
                                                      measure.pred$keepX == test.keepX[keepX] &
                                                      measure.pred$keepY == test.keepY[keepY] &
                                                      measure.pred$V == v &
                                                      measure.pred$measure == measure_i
-                                                   ,]$value.v<- measure.vpred$value
+                                                   ,]$value.v[[1]]<- measure.vpred$value
          
                                       
                                     }
@@ -263,7 +262,7 @@ tune.spls <-
                                                    measure.pred$keepX == test.keepX[keepX] &
                                                    measure.pred$keepY == test.keepY[keepY] &
                                                    measure.pred$V == 'u' 
-                                                 ,]$value.Q2.total <- value.Q2.total
+                                                 ,]$value.Q2.total[[1]] <- value.Q2.total
                                     
                                   }
 
