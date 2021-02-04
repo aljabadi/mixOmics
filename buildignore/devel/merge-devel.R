@@ -7,11 +7,17 @@
 ## we should also increase the examples / unit tests
 ## then we can push to orihin and upstream
 ## we can also modularise the handbook changes
+data(nutrimouse)
+X <- nutrimouse$gene  
+Y <- nutrimouse$lipid
 list.keepX <- c(2:10, 15, 20)
 # tuning based on correlations
-set.seed(30) # for reproducbility in this vignette, otherwise increase nrepeat
+set.seed(30)
 tune.spls.cor <- tune.spls(X, Y, ncomp = 3,
                            test.keepX = list.keepX,
                            validation = "Mfold", folds = 5,
-                           nrepeat = 10, progressBar = FALSE,
+                           nrepeat = 3, progressBar = FALSE,
                            measure = 'cor')
+
+debugonce(plot)
+plot(tune.spls.MAE, legend.position = 'topright')
