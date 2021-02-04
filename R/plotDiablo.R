@@ -141,7 +141,7 @@ plotDiablo <- function(object,
 #' @rdname plotDiablo
 #' @method plot sgccda
 #' @export
-plot.sgccda <- plotDiablo
+plot.sgccda <- function(x, ...) plotDiablo(object = x, ...)
 
 splotMatPlot = function(x, y, datNames, Y, ptype, col.per.group)
 {
