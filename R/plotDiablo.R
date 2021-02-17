@@ -55,7 +55,7 @@
 #' ## default col.per.group
 #' plotDiablo(BC.diablo, ncomp = 1, legend = TRUE, col.per.group = NULL)
 #' ## custom col.per.group
-#' col.per.group <- viridisLite::viridis(3)
+#' col.per.group <- color.mixo(1:3)
 #' names(col.per.group) <- levels(Y)
 #' plotDiablo(BC.diablo, ncomp = 1, legend = TRUE, col.per.group = col.per.group)
 plotDiablo <- function(object,
