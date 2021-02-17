@@ -51,7 +51,8 @@ characters or integers. See \code{\link{points}} for all alternatives.}
 \item{sd}{If 'nrepeat' was used in the call to 'tune.splsda', error bar
 shows the standard deviation if sd=TRUE}
 
-\item{...}{Not used.}
+\item{...}{Further arguments sent to \code{\link{xyplot}} function.
+Not currently used for \code{tune.spca}.}
 
 \item{optimal}{If TRUE, highlights the optimal keepX per component}
 
