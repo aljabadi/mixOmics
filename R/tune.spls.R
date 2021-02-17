@@ -31,7 +31,7 @@
 # ========================================================================================================
 # TODO details on nrepeat
 # TODO details on pls vs spls
-# TODO tidy outputs preferrably in an array
+# TODO tidy outputs preferably in an array
 #' Tuning functions for sPLS and PLS functions
 #' 
 #' @template description/tune
@@ -54,7 +54,7 @@
 #'   details.
 #' @template arg/progressBar
 #' @template arg/BPPARAM
-#' @param LimQ2 Q2 threshold for recommending optimal \code{ncomp}.
+#' @param limQ2 Q2 threshold for recommending optimal \code{ncomp}.
 #' @param ... Optional parameters passed to \code{\link{spls}}
 #' @return A list that contains: \item{cor.pred}{The correlation of predicted vs
 #'   actual components from X (t) and Y (u) for each
@@ -251,7 +251,7 @@ tune.spls <-
                                                      measure.pred$keepY == test.keepY[keepY] &
                                                      measure.pred$V == v &
                                                      measure.pred$measure == measure_i
-                                                   ,]$value.v[[1]]<- measure.vpred$value
+                                                   ,]$value.v[[1]] <- measure.vpred$value
          
                                       
                                     }
