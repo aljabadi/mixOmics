@@ -118,7 +118,7 @@
 #' # plot the results
 #' plot(tune.res)
 #' }
-# change this so that it simply wraps perf
+# TODO change this so that it simply wraps perf
 tune.spls <- 
     function(X,
              Y,
@@ -358,7 +358,8 @@ tune.spls <-
                                    ,]$value.Q2.total[[1]]
           keep.comp <- mean(Q2.total) >= limQ2
           if (keep.comp)
-            choice.ncomp <- comp
+            # we want the first component that drops Q2 below limQ2
+            choice.ncomp <- comp + 1
         }
         names(choice.keepX) <- names(choice.keepY) <- paste0('comp', seq_len(ncomp))
         out$choice.keepX = choice.keepX
