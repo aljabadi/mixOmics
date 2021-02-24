@@ -318,7 +318,7 @@ tune <-
                                    nrepeat = nrepeat,
                                    folds = folds,
                                    mode = mode,
-                                   measure.tune = measure,
+                                   measure = measure,
                                    BPPARAM = BPPARAM,
                                    progressBar = progressBar
                 )
