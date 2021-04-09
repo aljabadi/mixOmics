@@ -302,12 +302,12 @@ tune <-
                 if (cpus > 1)
                 {
                     if (.onUnix()) 
-                        BPPARAM <- MulticoreParam(workers = cpus) 
+                        BPPARAM <- BiocParallel::MulticoreParam(workers = cpus) 
                     else
-                        BPPARAM <- SnowParam(workers = cpus) 
+                        BPPARAM <- BiocParallel::SnowParam(workers = cpus) 
                 } else 
                 {
-                        BPPARAM <- SerialParam()
+                        BPPARAM <- BiocParallel::SerialParam()
                 }
                 result = tune.spls(X = X,
                                    Y = Y,

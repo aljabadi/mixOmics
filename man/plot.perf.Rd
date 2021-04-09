@@ -217,6 +217,7 @@ supplemental material of the mixOmics article (Rohart et al. 2017).
  perf.pls1.liver  = perf(pls1.liver, validation = 'Mfold', 
                          folds = 3, nrepeat = 3, progressBar = TRUE)
  plot(perf.pls1.liver , criterion = 'Q2')
+ plot(perf.pls1.liver , criterion = 'MSEP')
  perf.pls2.liver  = perf(pls2.liver, validation = 'Mfold', 
                          folds = 3, nrepeat = 3, progressBar = TRUE)
  plot(perf.pls2.liver , criterion = 'Q2.total')
@@ -256,6 +257,7 @@ plot(breast.perf, col=1:3, sd=FALSE)
  perf.pls1.liver  = perf(pls1.liver, validation = 'Mfold', 
                          folds = 3, nrepeat = 3, progressBar = TRUE)
  plot(perf.pls1.liver , criterion = 'Q2')
+ plot(perf.pls1.liver , criterion = 'MSEP')
  perf.pls2.liver  = perf(pls2.liver, validation = 'Mfold', 
                          folds = 3, nrepeat = 3, progressBar = TRUE)
  plot(perf.pls2.liver , criterion = 'Q2.total')

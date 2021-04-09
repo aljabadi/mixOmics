@@ -14,7 +14,7 @@ plotDiablo(
   ...
 )
 
-\method{plot}{sgccda}(object, ncomp = 1, legend = TRUE, legend.ncol, col.per.group = NULL, ...)
+\method{plot}{sgccda}(x, ...)
 }
 \arguments{
 \item{object}{object of class inheriting from \code{"block.splsda"}.}
