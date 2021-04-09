@@ -362,7 +362,7 @@ model.spls.val <- perf(model.spls, validation = "Mfold", folds = 5 )
 model.spls.val$measures$Q2$summary
 
 # R2: we can see how the performance degrades when ncomp increases
-plot(model.spls.val, criterion="R2", type = 'l')
+plot(model.spls.val, criterion="R2")
 
 ## validation for objects of class 'splsda' (classification)
 # ----------------------------------------
@@ -411,7 +411,7 @@ res = mint.splsda(X = stemcells$gene, Y = stemcells$celltype,
 
 out = perf(res, auc = TRUE)
 out
-
+plot(out)
 out$auc
 out$auc.study
 
@@ -431,12 +431,13 @@ scheme = "horst")
 
 perf = perf(nutrimouse.sgccda)
 perf
+plot(perf)
 
 
 # with 5 components and nrepeat=5 to get $choice.ncomp
 nutrimouse.sgccda <- block.splsda(X=data,
 Y = Y,
-design = design,
+design = 'full',
 keepX = list(gene=c(10,10), lipid=c(15,15)),
 ncomp = 5,
 scheme = "horst")
