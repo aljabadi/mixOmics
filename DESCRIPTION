@@ -28,6 +28,7 @@ Suggests: BiocStyle,
           knitr, 
           rmarkdown, 
           testthat, 
+          ggrepel, 
           rgl
 Authors@R: 
     c(person("Kim-Anh", "Le Cao", role = c("aut", "cre"), email = "kimanh.lecao@unimelb.edu.au"), 

@@ -665,3 +665,37 @@ mixo_gg.theme <- function(cex, x.angle = 90, background.fill = 'grey97', subtitl
     else
         sprintf("\033[33m%s\033[39m", char)
 }
+
+
+
+#' get geom_text based on repel arg
+#'
+#' @param repel Logical repel arg
+#' @param style Plot style. See ?plotIndiv
+#' @noRd
+#' @return geom_text function variation
+#' @keywords Internal
+.get_geom_text <- function(repel, style = 'ggplot2')
+{
+    if (isTRUE(repel))
+    {
+        
+        if (style != 'ggplot2')
+            message("repel can only be used with style = 'ggplot2'")
+        
+        repel <- FALSE
+        if(repel && requireNamespace("ggrepel", quietly = TRUE) == FALSE)
+            stop("the 'ggrepel' package is required with repel=TRUE", call. = FALSE)
+        
+    }
+    
+    if (repel)
+    {
+        geom_text_ <- ggplot2::geom_text
+    } else {
+        geom_text_ <- ggrepel::geom_text_repel
+        formals(geom_text_)$max.overlaps <- Inf
+    }
+    geom_text_
+}
+

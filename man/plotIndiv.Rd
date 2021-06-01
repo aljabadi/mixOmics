@@ -208,6 +208,7 @@ plotIndiv(object, ...)
   comp = NULL,
   rep.space = NULL,
   ind.names = TRUE,
+  repel = FALSE,
   group,
   col.per.group,
   style = "ggplot2",
@@ -455,6 +456,9 @@ for the legend.}
 
 \item{legend.title.pch}{title of the second legend created by \code{pch}, if
 any.}
+
+\item{repel}{(if ind.names=TRUE), Logical indicating whether to spread the
+names away from each other in the plot.}
 
 \item{background}{color the background by the predicted class, see
 \code{\link{background.predict}}}

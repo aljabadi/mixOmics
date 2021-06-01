@@ -19,6 +19,7 @@ plotVar(
   comp.select = comp,
   plot = TRUE,
   var.names = NULL,
+  repel = FALSE,
   blocks = NULL,
   X.label = NULL,
   Y.label = NULL,
@@ -58,6 +59,9 @@ summaries which the plots are based on are returned.}
 \item{var.names}{either a character vector of names for the variables to be
 plotted, or \code{FALSE} for no names. If \code{TRUE}, the col names of the
 first (or second) data matrix is used as names.}
+
+\item{repel}{(if ind.names=TRUE), Logical indicating whether to spread the
+names away from each other in the plot.}
 
 \item{blocks}{for an object of class \code{"rgcca"} or \code{"sgcca"}, a
 numerical vector indicating the block variables to display.}

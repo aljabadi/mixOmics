@@ -9,6 +9,7 @@ plotIndiv.mixo_pls <-
              comp  = NULL,
              rep.space  = NULL,
              ind.names  = TRUE,
+             repel = FALSE,
              group,
              col.per.group,
              style = "ggplot2",
@@ -103,7 +104,7 @@ plotIndiv.mixo_pls <-
             stop("'background' must have been obtained with the 'background.predict' function")
         
         #-- check inputs
-        check  = check.input.plotIndiv(object = object, comp  = comp , blocks  = blocks, ind.names  = ind.names, 
+        check  = check.input.plotIndiv(object = object, comp  = comp , blocks  = blocks, ind.names  = ind.names, repel = repel,
                                        style = style, ellipse  = ellipse, ellipse.level  = ellipse.level, centroid = centroid, 
                                        star = star, legend = legend, X.label  = X.label, Y.label  = Y.label, Z.label  = Z.label, abline  = abline, 
                                        xlim  = xlim, ylim  = ylim, alpha = alpha, axes.box  = axes.box, plot_parameters = plot_parameters)
@@ -167,7 +168,7 @@ plotIndiv.mixo_pls <-
         #call plot module (ggplot2, lattice, graphics, 3d)
         res = internal_graphicModule(df = df, centroid = centroid, col.per.group = col.per.group, title = title,
                                      X.label = X.label, Y.label = Y.label, Z.label = Z.label, xlim = xlim, ylim = ylim, class.object = class(object),
-                                     display.names = display.names, legend = legend, abline = abline, star = star,
+                                     display.names = display.names, repel = repel, legend = legend, abline = abline, star = star,
                                      ellipse = ellipse, df.ellipse = df.ellipse, style = style, layout = layout, #missing.col = missing.col,
                                      axes.box = axes.box, plot_parameters = plot_parameters, alpha = alpha, background = background)
         

@@ -66,6 +66,7 @@
 #' @param ind.names either a character vector of names for the individuals to
 #' be plotted, or \code{FALSE} for no names. If \code{TRUE}, the row names of
 #' the first (or second) data matrix is used as names (see Details).
+#' @template arg/repel
 #' @param group factor indicating the group membership for each sample, useful
 #' for ellipse plots. Coded as default for the supervised methods \code{PLS-DA,
 #' SPLS-DA,sGCCDA}, but needs to be input for the unsupervised methods
@@ -160,6 +161,7 @@ check.input.plotIndiv <-
            blocks = NULL,
            # to choose which block data to plot, when using GCCA module
            ind.names = TRUE,
+           repel = repel,
            style = "ggplot2",
            # can choose between graphics, 3d, lattice or ggplot2
            #study = "global",
@@ -191,6 +193,7 @@ check.input.plotIndiv <-
     #-- style
     if (!style %in% c("ggplot2", "lattice", "graphics", "3d"))
       stop("'style' must be one of 'ggplot2', 'lattice', 'graphics' or '3d' .", call. = FALSE)
+    
     
     #-- axes.box
     choices = c("box", "bbox", "both")

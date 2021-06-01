@@ -50,6 +50,7 @@
 #' @param var.names either a character vector of names for the variables to be
 #' plotted, or \code{FALSE} for no names. If \code{TRUE}, the col names of the
 #' first (or second) data matrix is used as names.
+#' @template arg/repel
 #' @param blocks for an object of class \code{"rgcca"} or \code{"sgcca"}, a
 #' numerical vector indicating the block variables to display.
 #' @param X.label x axis titles.
@@ -109,6 +110,7 @@ plotVar <-
              comp.select = comp,
              plot = TRUE,
              var.names = NULL,
+             repel = FALSE,
              blocks = NULL,
              # to choose which block data to plot, when using GCCA module
              X.label = NULL,
@@ -673,14 +675,23 @@ plotVar <-
             for (i in levels(df$Block))
                 p = p + geom_point(data = subset(df, df$Block == i), size = 0, shape = 0)
             
+            .geom_text <- .get_geom_text(repel = repel, style = style)
+            
             #-- Display sample or var.names
             for (i in seq_len(length(var.names))){
                 if (var.names[i]) {
-                    p = p + geom_text(data = df[c((ind.group[i] + 1) : ind.group[i + 1]), ],
+                    p = p + .geom_text(data = df[c((ind.group[i] + 1) : ind.group[i + 1]), ],
                                       label = df[c((ind.group[i] + 1) : ind.group[i + 1]), "names"],
                                       size = df[c((ind.group[i] + 1) : ind.group[i + 1]), "cex"],
                                       color = df[c((ind.group[i] + 1) : ind.group[i + 1]), "col"],
                                       fontface = df[c((ind.group[i] + 1) : ind.group[i + 1]), "font"])
+                    
+                    if (repel) {
+                        p = p + geom_point(data = df[c((ind.group[i] + 1) : ind.group[i + 1]), ],
+                                           size = 2,
+                                           shape = 16,
+                                           color = df[c((ind.group[i] + 1) : ind.group[i + 1]), "col"])
+                    }
                 } else {
                     p = p + geom_point(data = df[c((ind.group[i] + 1) : ind.group[i + 1]), ],
                                        size = df[c((ind.group[i] + 1) : ind.group[i + 1]), "cex"],

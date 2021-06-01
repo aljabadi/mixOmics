@@ -57,6 +57,7 @@ internal_graphicModule <-
              zlim,
              class.object,
              display.names,
+             repel = FALSE,
              legend,
              abline,
              star,
@@ -258,11 +259,13 @@ internal_graphicModule <-
                 {
                     if (display.names)
                     {
-                        p = p +geom_point(data = subset(df, col == i &
-                                                            df$Block == levels(df$Block)[j]),size = 0, shape = 0,
+                        .geom_text <- .get_geom_text(repel = repel, style = style)
+                        
+                        p = p + geom_point(data = subset(df, col == i &
+                                                            df$Block == levels(df$Block)[j]),size = ifelse(repel, 2, 0),
                                           color = unique(df[df$col == i & df$Block ==
-                                                                levels(df$Block)[j], ]$col))+
-                            geom_text(data = subset(df, col == i & df$Block ==
+                                                                levels(df$Block)[j], ]$col), shape = 16)+
+                            .geom_text(data = subset(df, col == i & df$Block ==
                                                         levels(df$Block)[j]),
                                       aes(label = names),
                                       color = df[df$col == i & df$Block ==
