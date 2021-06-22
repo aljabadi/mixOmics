@@ -177,6 +177,14 @@ TCGA.block.splsda$design
 # illustrates coefficient weights in each block
 plotLoadings(TCGA.block.splsda, ncomp = 1, contrib = 'max')
 plotVar(TCGA.block.splsda, style = 'graphics', legend = TRUE)
+
+## plot signature variables for mrna and mirna
+# min contribution for mrna
+plotSig(object = TCGA.block.splsda, comp = 1, block = 'mrna', contrib = 'min')
+## plot only the top 6 variables
+plotSig(object = TCGA.block.splsda, comp = 1, block = 'mrna', contrib = 'min', top_n = 6)
+# max contribution for protein
+plotSig(object = TCGA.block.splsda, comp = 1, block = 'protein', contrib = 'max')
 }
 \references{
 On multiple integration with sPLS-DA and 4 data blocks:

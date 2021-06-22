@@ -22,6 +22,14 @@ plotIndiv(TCGA.block.spls, group =  breast.TCGA$data.train$subtype, ind.names = 
 # illustrates coefficient weights in each block
 plotLoadings(TCGA.block.spls, ncomp = 1)
 plotVar(TCGA.block.spls, style = 'graphics', legend = TRUE)
+
+## plot signature variables for mrna and mirna
+group <- breast.TCGA$data.train$subtype
+# min contribution for mrna
+plotSig(object = TCGA.block.spls, comp = 1, block = 'mrna', contrib = 'min', group = group)
+# max contribution for protein
+plotSig(object = TCGA.block.spls, comp = 1, block = 'Y', contrib = 'max', group = group)
+
 \dontrun{
 network(TCGA.block.spls)
 }
