@@ -34,3 +34,13 @@ TCGA.block.splsda$design
 # illustrates coefficient weights in each block
 plotLoadings(TCGA.block.splsda, ncomp = 1, contrib = 'max')
 plotVar(TCGA.block.splsda, style = 'graphics', legend = TRUE)
+
+## plot markers (selected variables) for mrna and mirna
+# min contribution for mrna for each selected feature separately
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'mrna', contrib = 'min')
+# min contribution for mrna for all selected features
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'mrna', contrib = 'min', global = TRUE)
+## plot only the top 6 variables
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'mrna', contrib = 'min', top_n = 6)
+# max contribution for protein
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'protein', contrib = 'max')
