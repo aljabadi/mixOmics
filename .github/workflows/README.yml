@@ -1,8 +1,7 @@
 on:
   push:
-  pull_request:
     branches:
-      - master
+      - devel
   schedule:
     - cron: '0 8 * * 4'
 
@@ -63,4 +62,6 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
+          base: devel
+          branch: updateREADME
           token: ${{ secrets.UPDATE_README }}
