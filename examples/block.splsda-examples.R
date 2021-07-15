@@ -12,7 +12,7 @@ design
 # set number of component per data set
 ncomp = c(2)
 # set number of variables to select, per component and per data set (this is set arbitrarily)
-list.keepX = list(mrna = rep(20, 2), mirna = rep(10,2), protein = rep(10, 2))
+list.keepX = list(mrna = rep(5,2), mirna = rep(5,2), protein = rep(5,2))
 
 
 TCGA.block.splsda = block.splsda(X = data, Y = breast.TCGA$data.train$subtype, 
@@ -34,3 +34,11 @@ TCGA.block.splsda$design
 # illustrates coefficient weights in each block
 plotLoadings(TCGA.block.splsda, ncomp = 1, contrib = 'max')
 plotVar(TCGA.block.splsda, style = 'graphics', legend = TRUE)
+
+## plot markers (selected variables) for mrna and mirna
+# mrna: show each selected feature separately
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'mrna')
+# mrna: show all selected features
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'mrna', global = TRUE)
+# proteins
+plotMarkers(object = TCGA.block.splsda, comp = 1, block = 'protein')
