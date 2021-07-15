@@ -1,10 +1,9 @@
 
-<!-- PLEASE DO NOT EDIT BY HAND, EDIT ./inst/README.Rmd AND RENDER TO CREATE THIS -->
+<!-- PLEASE DO NOT EDIT ./README.md BY HAND, EDIT ./inst/README.Rmd AND RENDER TO CREATE ./README.md -->
 
 [![R build
 status](https://github.com/mixOmicsteam/mixOmics/workflows/R-CMD-check/badge.svg)](https://github.com/mixOmicsteam/mixOmics/actions)
-<!-- [![](https://img.shields.io/badge/bioc%20release-6.14.1-green.svg)](https://www.bioconductor.org/packages/mixOmics) -->
-<!-- [![Build Status](https://travis-ci.org/mixOmicsTeam/mixOmics.svg?branch=master)](https://travis-ci.org/mixOmicsTeam/mixOmics) -->
+[![](https://img.shields.io/badge/bioc%20release-6.16.1-green.svg)](https://www.bioconductor.org/packages/mixOmics)
 [![](https://codecov.io/gh/mixOmicsTeam/mixOmics/branch/master/graph/badge.svg)](https://codecov.io/gh/mixOmicsTeam/mixOmics)
 [![download](http://www.bioconductor.org/shields/downloads/release/mixOmics.svg)](https://bioconductor.org/packages/stats/bioc/mixOmics)
 [![](https://img.shields.io/github/last-commit/mixOmicsTeam/mixOmics.svg)](https://github.com/mixOmicsTeam/mixOmics/commits/master)
@@ -19,7 +18,7 @@ and our stable and development `GitHub` versions.
 
 ## Installation
 
-**(Mac OS Users Only:)** Ensure you have installed
+**(macOS users only:)** Ensure you have installed
 [XQuartz](https://www.xquartz.org/) first.
 
 Make sure you have the latest R version and the latest `BiocManager`
@@ -32,7 +31,12 @@ mentioned page).
 ## install BiocManager if not installed
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-## ensure the following returns TRUE, or follow guidelines
+```
+
+Ensure the following returns `TRUE`, or follow guidelines provided by
+the output.
+
+``` r
 BiocManager::valid()
 ```
 
