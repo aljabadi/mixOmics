@@ -1,4 +1,7 @@
 on:
+  push:
+    branches:
+      - devel
   schedule:
     - cron: '0 8 * * 4'
 
