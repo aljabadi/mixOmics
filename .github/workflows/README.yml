@@ -59,7 +59,7 @@ jobs:
           git config user.email 'al.jal.abadi@gmail.com'
           git add README.md
           touch foo.md
-          git add foo.md
+          git add -f foo.md
           git diff-index --quiet HEAD || git commit -am "Update README"
           
       - name: Create Pull Request
