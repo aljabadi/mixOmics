@@ -1,0 +1,64 @@
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 8 * * 4'
+
+name: "Update README"
+
+jobs:
+  Update-README:
+    if: (github.repository == 'aljabadi/mixOmics')
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: ubuntu-latest, r: 'release'}
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out repo ⬇️
+        uses: actions/checkout@v2
+
+      - name: Set up R ▶️
+        uses: r-lib/actions/setup-r@master
+        with:
+          r-version: ${{ matrix.config.r }}
+        
+      - name: Set up pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+        
+      - name: Install system dependencies 🔧
+        if: runner.os == 'Linux'
+        env:
+          RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
+        run: |
+          sudo apt-get update && sudo apt-get -y install libcurl4-openssl-dev
+          
+      - name: Install packages 🔧
+        run: |
+          install.packages('rmarkdown')
+          install.packages('badger')
+        shell: Rscript {0}
+
+      - name: Render README 📖
+        run: |
+          rmarkdown::render("inst/README.Rmd", output_dir = "../")
+        shell: Rscript {0}
+
+      - name: Create commits
+        run: |
+          git config user.name 'Al J Abadi'
+          git config user.email 'al.jal.abadi@gmail.com'
+          git add README.md
+          git diff-index --quiet HEAD || git commit -am "Update README"
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
