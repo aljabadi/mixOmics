@@ -57,6 +57,7 @@ jobs:
           git config user.name 'Al J Abadi'
           git config user.email 'al.jal.abadi@gmail.com'
           git add -f README.md
+          git diff --cached README.md # show diffs
           git diff-index --quiet HEAD || git commit -am "automatic update of README.md"
           
       - name: Create Pull Request
