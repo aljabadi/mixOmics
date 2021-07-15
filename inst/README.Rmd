@@ -8,7 +8,7 @@ knit: (function(inputFile, encoding) {
     rmarkdown::render(inputFile, output_file="README.md", encoding = encoding, output_dir = "../") })
 ---
 
-<!-- PLEASE DO NOT EDIT BY HAND, EDIT ./inst/README.Rmd AND RENDER TO CREATE THIS -->
+<!-- PLEASE DO NOT EDIT ./README.md BY HAND, EDIT ./inst/README.Rmd AND RENDER TO CREATE ./README.md -->
 
 ```{r create-badges, include=FALSE, eval=TRUE}
 if (!requireNamespace('badger', quietly = TRUE))
@@ -31,13 +31,13 @@ bioc_release_badge <- gsub(bioc_release_badge, pattern = "release%20version", re
 # latest_devel <- sprintf("https://img.shields.io/badge/latest%%20devel-%s-orange.svg", github_devel)
 # 
 # latest_stable_badge <- sprintf("[![](%s)](https://github.com/mixOmicsTeam/mixOmics#latest-github-version)", latest_stable)
-latest_stable_build <- "[![Build Status](https://travis-ci.org/mixOmicsTeam/mixOmics.svg?branch=master)](https://travis-ci.org/mixOmicsTeam/mixOmics)"
+# latest_stable_build <- "[![Build Status](https://travis-ci.org/mixOmicsTeam/mixOmics.svg?branch=master)](https://travis-ci.org/mixOmicsTeam/mixOmics)"
 # latest_devel_badge <- sprintf("[![](%s)](https://github.com/mixOmicsTeam/mixOmics#development-version)", latest_devel)
 # latest_devel_build <- "[![Build Status](https://travis-ci.org/mixOmicsTeam/mixOmics.svg?branch=devel)](https://travis-ci.org/mixOmicsTeam/mixOmics)"
 ```
 
 `r badge_github_actions("mixOmicsteam/mixOmics")`
-<!-- `r bioc_release_badge` -->
+`r bioc_release_badge`
 <!-- `r latest_stable_build` -->
 `r badge_codecov("mixOmicsTeam/mixOmics")`
 `r badge_bioc_download_rank('mixOmics')`
