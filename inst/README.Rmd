@@ -11,6 +11,8 @@ knit: (function(inputFile, encoding) {
 <!-- PLEASE DO NOT EDIT BY HAND, EDIT ./inst/README.Rmd AND RENDER TO CREATE THIS -->
 
 ```{r create-badges, include=FALSE, eval=TRUE}
+if (!requireNamespace('badger', quietly = TRUE))
+  install.packages("badger")
 library(badger)
 pkg_license <- read.dcf("../DESCRIPTION")[, "License"]
 pkg_license_badge <- sprintf("https://img.shields.io/badge/license-%s-lightgrey.svg", pkg_license)
