@@ -119,9 +119,9 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
-      - name: Check ✅ 
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
+      # - name: Check ✅ 
+      #   run: rcmdcheck::rcmdcheck(args = c("--no-manual"), error_on = "warning", check_dir = "check")
+      #   shell: Rscript {0}
 
       - name: Check --as-cran ✅ ✅ 
         if: github.event_name == 'schedule' && github.repository == 'mixOmicsTeam/mixOmics'
