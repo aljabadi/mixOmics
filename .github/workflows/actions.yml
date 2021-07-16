@@ -16,11 +16,25 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
+      push_docker: ${{ steps.docker_branch.outputs.do_push }}
     steps:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@master
         with:
           github_token: ${{ github.token }}
+      - uses: rlespinasse/github-slug-action@v3.x
+      - id: docker_branch
+        run: |
+          # Only Dockerise for 'master' or 'RELEASE_*' branches
+          BRANCH_REGEX="^(master$|RELEASE_/*)"
+          if [[ $BRANCH =~ $BRANCH_REGEX && github.event_name != 'schedule' && github.repository == 'mixOmicsTeam/mixOmics' ]];
+          then
+              do_push=true
+          else
+              do_push=false
+          fi
+          echo ::set-output name=do_push::$do_push
+
 
   R-CMD-check:
     needs: gatekeeper
@@ -133,18 +147,28 @@ jobs:
         if: always()
         run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
-
-      - name: Push to DockerHub
-        if: >
-            github.event_name != 'schedule' && github.repository == 'mixOmicsTeam/mixOmics' && ${{ env.GITHUB_REF_SLUG }}  == "master"
-        uses: docker/build-push-action@v1
+      -
+         name: Set up Docker Buildx
+         if: needs.gatekeeper.output.push_docker == 'true'
+         uses: docker/setup-buildx-action@v1
+      -
+        name: Login to DockerHub
+        if: needs.gatekeeper.output.push_docker == 'true'
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: mixomicsteam/mixomics
-          tag_with_ref: true
-          tag_with_sha: true
-          tags: latest
+      -
+        name: Build and push
+        if: needs.gatekeeper.output.push_docker == 'true'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          pull: true
+          push: true
+          cache-from: type=registry,ref=mixomicsteam/mixomics:${{ env.GITHUB_REF_SLUG }}
+          cache-to: type=inline
+          tags: mixomicsteam/mixomics:${{ env.GITHUB_REF_SLUG }}
 
       - name: Test coverage 🔍
         # if: (matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'release')
