@@ -13,7 +13,6 @@ name: R-CMD-check
 jobs:
   ## pre-job to determine if a job has been run for the same SHA (e.g. on a different branch)
   Check_for_duplicate_action:
-    if: (github.event_name != 'schedule')
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -55,17 +54,17 @@ jobs:
         if: matrix.config.image == null
         with:
           r-version: ${{ matrix.config.r }}
-
+      - uses: rlespinasse/github-slug-action@v3.x
       - name: Install remotes 🔭
         run: |
-          install.packages('remotes')
+          install.packages('remotes', Ncpus=2)
         shell: Rscript {0}
 
       - name: Set BiocManager version 📆
         if: matrix.config.image == null
         run: |
-          install.packages('BiocManager')
-          BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE)
+          install.packages('BiocManager', Ncpus=2)
+          BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE, Ncpus=2)
         shell: Rscript {0}
 
       - name: Query dependencies ❓
@@ -95,8 +94,8 @@ jobs:
         run: |
           options(repos = c(CRAN = "https://cran.r-project.org"))
           remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories(), Ncpus=2)
-          remotes::install_cran("rcmdcheck")
-          remotes::install_cran("covr")
+          remotes::install_cran("rcmdcheck", Ncpus=2)
+          remotes::install_cran("covr", Ncpus=2)
         shell: Rscript {0}
 
       - name: Session info 🖥️ 
@@ -119,7 +118,7 @@ jobs:
       - name: BiocCheck 🧬 ✅
         if: github.event_name == 'schedule' && github.repository == 'mixOmicsTeam/mixOmics'
         run: |
-          BiocManager::install("BiocCheck")
+          BiocManager::install("BiocCheck", Ncpus=2)
           BiocCheck::BiocCheck(".")
         shell: Rscript {0}
 
@@ -137,8 +136,7 @@ jobs:
 
       - name: Push to DockerHub
         if: >
-            github.event_name != 'schedule' && github.repository == 'mixOmicsTeam/mixOmics' &&
-            ('${GITHUB_REF##*/}' == 'master' || '${GITHUB_REF##*/}' == 'devel')
+            github.event_name != 'schedule' && github.repository == 'mixOmicsTeam/mixOmics' && ${{ env.GITHUB_REF_SLUG }}  == "master"
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
