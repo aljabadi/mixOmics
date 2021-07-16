@@ -134,11 +134,13 @@ jobs:
         if: always()
         run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
+        
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
 
       - name: Push to DockerHub
         if: >
-            github.event_name != 'schedule' && github.repository == 'mixOmicsTeam/mixOmics' &&
-            ('${GITHUB_REF##*/}' == 'master' || '${GITHUB_REF##*/}' == 'devel')
+            github.event_name != 'schedule' && github.repository == 'mixOmicsTeam/mixOmics' && "${{ env.GITHUB_REF_SLUG }}"  == "master"
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
